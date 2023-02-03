@@ -13,6 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      RENV_PATHS_ROOT: ~/.local/share/renv
+
 
     steps:
       - uses: actions/checkout@v3
@@ -21,10 +23,10 @@ jobs:
         with:
           use-public-rspm: true
 
-      - uses: r-lib/actions/setup-r-dependencies@v2
-        with:
-          extra-packages: any::covr
-          needs: coverage
+      - uses: r-lib/actions/setup-renv@v2
+
+      - name: Activate renv and restore packages with cache
+        uses: r-lib/actions/setup-renv@v2
 
       - name: Test coverage
         run: |

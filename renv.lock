@@ -123,6 +123,22 @@
       "Hash": "b6e3e947d1d7ebf3d2bdcea1bde63fe7",
       "Requirements": []
     },
+    "covr": {
+      "Package": "covr",
+      "Version": "3.6.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "a861cee34fbb4b107a73dd414ef56724",
+      "Requirements": [
+        "crayon",
+        "digest",
+        "httr",
+        "jsonlite",
+        "rex",
+        "withr",
+        "yaml"
+      ]
+    },
     "cpp11": {
       "Package": "cpp11",
       "Version": "0.4.3",
@@ -453,6 +469,14 @@
         "rlang"
       ]
     },
+    "lazyeval": {
+      "Package": "lazyeval",
+      "Version": "0.2.2",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "d908914ae53b04d4c0c0fd72ecc35370",
+      "Requirements": []
+    },
     "lifecycle": {
       "Package": "lifecycle",
       "Version": "1.0.3",
@@ -740,6 +764,16 @@
       "Repository": "CRAN",
       "Hash": "c9e8442ab69bc21c9697ecf856c1e6c7",
       "Requirements": []
+    },
+    "rex": {
+      "Package": "rex",
+      "Version": "1.2.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "ae34cd56890607370665bee5bd17812f",
+      "Requirements": [
+        "lazyeval"
+      ]
     },
     "rlang": {
       "Package": "rlang",
