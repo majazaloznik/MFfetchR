@@ -31,9 +31,6 @@ jobs:
 
       - uses: r-lib/actions/setup-renv@v2
 
-      - name: Activate renv and restore packages with cache
-        uses: r-lib/actions/setup-renv@v2
-
       - name: Test coverage
         run: |
           covr::codecov(
