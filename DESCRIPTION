@@ -2,11 +2,9 @@ Package: MFfetchR
 Type: Package
 Title: What the Package Does (Title Case)
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: GPL (>= 3)
+Author: Maja Zaloznik
+Maintainer: Maja Zaloznik <maja.zaloznik@gmail.com>
+Description: The goal of MFfetchR is to check for new MF data tables somewhere (a folder or email) import and parse the data, and prepare it for the UMAR data model.
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.2.3
@@ -14,3 +12,7 @@ Suggests:
     covr,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
+Imports: 
+    dplyr (>= 1.1.0),
+    readxl (>= 1.4.1)
+License: GPL (>= 3)
