@@ -83,5 +83,11 @@ mf_excel_parser <- function(file_path, table_name, sheet_name){
   annual <- df[grep("^\\d{4}$", df$period_id),]
   names(annual) <- c("period_id", paste0(names(annual)[-1], "--A"))
 
+  # lengthen tables
+  monthly <- tidyr::pivot_longer(monthly, !period_id, names_to = "code", values_to = "value") %>%
+    dplyr::arrange(code, period_id)
+  annual <- tidyr::pivot_longer(annual, !period_id, names_to = "code", values_to = "value") %>%
+    dplyr::arrange(code, period_id)
+
   return(list(monthly, annual, series))
 }

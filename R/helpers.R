@@ -44,7 +44,7 @@ konto_codes <- function(x){
          "PLA\u010cE IN DRUGI IZDATKI ZAPOSLENIM" = 911,
          "PRISPEVKI DELODAJALCEV ZA SOCIALNO VARNOST" = 912,
          "IZDATKI ZA BLAGO IN STORITVE" = 913,
-         stop("Koda \u0161e ne obstaja"))
+         stop(paste("Koda \u0161e ne obstaja za", x)))
 }
 
 #' Lookup for month codes
