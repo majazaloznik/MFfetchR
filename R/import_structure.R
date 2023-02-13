@@ -104,22 +104,22 @@ prepare_category_table_table <- function(con) {
 #' Prepare table to insert into `table_dimensions` table
 #'
 #' Helper function that manually prepares the table_dimensions table.
-#' Helper function that extracts the dimensions for each table and their "time" status.
 #' Returns table ready to insert into the `table_dimensions`table with the
 #' db_writing family of functions.
 #'
-#' @param code_no the matrix code (e.g. 2300123S)
 #' @param con connection to the database
 #' @return a dataframe with the `table_id`, `dimension_name`, `time` columns for
 #' each dimension of this table.
 #' @export
 #'
-prepare_table_dimensions_table <- function(code_no, con) {
-  get_table_id(code_no, con) -> tbl_id
-  get_table_levels(code_no) %>%
-    dplyr::mutate(table_id = tbl_id) %>%
-    dplyr::select(table_id, dimension_name, time) %>%
-    dplyr::rename(is_time = time,
-                  dimension = dimension_name)
+prepare_table_dimensions_table <- function(con){
+  data.frame(code = rep(c("DP", "ZPIZ", "ZZZS", "OB", "KBJF"), 2)) %>%
+    dplyr::rowwise() %>%
+    dplyr::mutate(table_id = as.numeric(UMARaccessR::get_table_id_from_table_code(code, con)[1,1])) %>%
+    dplyr::ungroup() %>%
+    dplyr::mutate(dimension = rep(c("Konto", "Interval"), each = 5),
+                  is_time = rep(0,10)) %>%
+    dplyr::select(-code) %>%
+    dplyr::arrange(table_id)
 }
 

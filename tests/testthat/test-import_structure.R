@@ -17,6 +17,8 @@ dittodb::with_mock_db({
     df <- prepare_category_table_table(con)
     expect_equal(dim(df), c(5,3))
     expect_equal(df$table_id[1], 24)
+    df <- prepare_table_dimensions_table(con)
+    expect_equal(dim(df), c(10,3))
   })
 })
 

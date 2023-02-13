@@ -4,11 +4,9 @@
 \alias{prepare_table_dimensions_table}
 \title{Prepare table to insert into `table_dimensions` table}
 \usage{
-prepare_table_dimensions_table(code_no, con)
+prepare_table_dimensions_table(con)
 }
 \arguments{
-\item{code_no}{the matrix code (e.g. 2300123S)}
-
 \item{con}{connection to the database}
 }
 \value{
@@ -17,7 +15,6 @@ each dimension of this table.
 }
 \description{
 Helper function that manually prepares the table_dimensions table.
-Helper function that extracts the dimensions for each table and their "time" status.
 Returns table ready to insert into the `table_dimensions`table with the
 db_writing family of functions.
 }
