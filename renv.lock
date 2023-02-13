@@ -781,10 +781,10 @@
     },
     "lubridate": {
       "Package": "lubridate",
-      "Version": "1.9.2",
+      "Version": "1.9.1",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "e25f18436e3efd42c7c590a1c4c15390",
+      "Hash": "88ad585eb49669b7f2db3f5ef3c8307d",
       "Requirements": [
         "generics",
         "timechange"
