@@ -92,6 +92,28 @@
         "tidyr"
       ]
     },
+    "UMARaccessR": {
+      "Package": "UMARaccessR",
+      "Version": "0.1.0",
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteRepo": "UMARaccessR",
+      "RemoteUsername": "majazaloznik",
+      "RemoteRef": "HEAD",
+      "RemoteSha": "775971924bc735af7a908cf875cb5bad7a1d8695",
+      "Hash": "c8c53d2bde3e6cb6148813a34f061737",
+      "Requirements": [
+        "DBI",
+        "RPostgres",
+        "dplyr",
+        "lubridate",
+        "magrittr",
+        "openxlsx",
+        "rlang",
+        "stringr"
+      ]
+    },
     "askpass": {
       "Package": "askpass",
       "Version": "1.1",
@@ -405,6 +427,25 @@
       "Repository": "CRAN",
       "Hash": "8b708f296afd9ae69f450f9640be8990",
       "Requirements": []
+    },
+    "dittodb": {
+      "Package": "dittodb",
+      "Version": "0.1.4.9000",
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteUsername": "ropensci",
+      "RemoteRepo": "dittodb",
+      "RemoteRef": "main",
+      "RemoteSha": "6a02e83f5defd996397d517d520a6674da135af9",
+      "Hash": "6c92a7fcdfb996a15e4741ce5452c852",
+      "Requirements": [
+        "DBI",
+        "digest",
+        "glue",
+        "lifecycle",
+        "rlang"
+      ]
     },
     "downlit": {
       "Package": "downlit",
@@ -740,10 +781,10 @@
     },
     "lubridate": {
       "Package": "lubridate",
-      "Version": "1.9.1",
+      "Version": "1.9.2",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "88ad585eb49669b7f2db3f5ef3c8307d",
+      "Hash": "e25f18436e3efd42c7c590a1c4c15390",
       "Requirements": [
         "generics",
         "timechange"
@@ -795,6 +836,18 @@
       "Hash": "b04c27110bf367b4daa93f34f3d58e75",
       "Requirements": [
         "askpass"
+      ]
+    },
+    "openxlsx": {
+      "Package": "openxlsx",
+      "Version": "4.2.5.2",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "c03b4c18d42da881fb8e15a085c2b9d6",
+      "Requirements": [
+        "Rcpp",
+        "stringi",
+        "zip"
       ]
     },
     "pillar": {
