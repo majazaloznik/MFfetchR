@@ -26,3 +26,5 @@ License: GPL (>= 3)
 Remotes: 
   majazaloznik/UMARaccessR,
     majazaloznik/SURSfetchR
+Depends: 
+    R (>= 2.10)

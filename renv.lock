@@ -101,8 +101,8 @@
       "RemoteRepo": "UMARaccessR",
       "RemoteUsername": "majazaloznik",
       "RemoteRef": "HEAD",
-      "RemoteSha": "775971924bc735af7a908cf875cb5bad7a1d8695",
-      "Hash": "c8c53d2bde3e6cb6148813a34f061737",
+      "RemoteSha": "8b81589fa5626741a2ec2e1dd5bb500ded193633",
+      "Hash": "c18ebf9d18a540e30ee475bbc4a14d74",
       "Requirements": [
         "DBI",
         "RPostgres",

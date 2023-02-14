@@ -123,3 +123,33 @@ prepare_table_dimensions_table <- function(con){
     dplyr::arrange(table_id)
 }
 
+
+#' Prepare table to insert into `dimension_levels` table
+#'
+#' Helper function that manually prepares the dimension_levels for each
+#' table and get their codes and text.
+#' Returns table ready to insert into the `dimension_levels`table with the
+#' db_writing family of functions.
+#'
+#' @param file_path path to the excel file
+#' @param table_name character string of table code
+#' @param sheet_name character string of sheet name with table in excel.
+#' @param con connection to the database
+#' @return a dataframe with the `dimension_id`, `values` and `valueTexts`
+#' columns for this table.
+#' @export
+#'
+prepare_dimension_levels_table <- function(file_path, table_name, sheet_name, con) {
+  table_id <- UMARaccessR::get_table_id_from_table_code(table_name, con)[1,1]
+  dim_id <- UMARaccessR::get_dim_id_from_table_id(as.numeric(table_id), "Konto", con)[1,1]
+  df <- mf_excel_parser(file_path, table_name, sheet_name)[[3]]
+  df %>%
+    dplyr::mutate(tab_dim_id = as.numeric(dim_id)) %>%
+    dplyr::rename(level_value = code, level_text = description)
+  dim_id <- UMARaccessR::get_dim_id_from_table_id(as.numeric(table_id), "Interval", con)[1,1]
+  df %>%
+    dplyr::bind_rows(data.frame(level_value = c("M", "A"),
+              level_text = c("Mesečno", "Letno"),
+              tab_dim_id = c(dim_id, dim_id)))
+}
+
