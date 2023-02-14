@@ -4,15 +4,19 @@
 \alias{prepare_dimension_levels_table}
 \title{Prepare table to insert into `dimension_levels` table}
 \usage{
-prepare_dimension_levels_table(code_no, con)
+prepare_dimension_levels_table(file_path, table_name, sheet_name, con)
 }
 \arguments{
-\item{code_no}{the matrix code (e.g. 2300123S)}
+\item{file_path}{path to the excel file}
+
+\item{table_name}{character string of table code}
+
+\item{sheet_name}{character string of sheet name with table in excel.}
 
 \item{con}{connection to the database}
 }
 \value{
-a dataframe with the `dimension_name`, `values`, `valueTexts`, and `id`
+a dataframe with the `dimension_id`, `values` and `valueTexts`
 columns for this table.
 }
 \description{

@@ -149,7 +149,7 @@ prepare_dimension_levels_table <- function(file_path, table_name, sheet_name, co
   dim_id <- UMARaccessR::get_dim_id_from_table_id(as.numeric(table_id), "Interval", con)[1,1]
   df %>%
     dplyr::bind_rows(data.frame(level_value = c("M", "A"),
-              level_text = c("Mesečno", "Letno"),
+              level_text = c("Mese\u010dno", "Letno"),
               tab_dim_id = c(dim_id, dim_id)))
 }
 
