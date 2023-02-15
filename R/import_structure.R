@@ -96,7 +96,7 @@ prepare_category_table_table <- function(con) {
                      category_id = 1:5,
                      source_id = rep(source_id,5)) %>%
       dplyr::rowwise() %>%
-      dplyr::mutate(table_id = as.numeric(UMARaccessR::get_table_id_from_table_code(code, con)[1,1])) %>%
+      dplyr::mutate(table_id = UMARaccessR::get_table_id_from_table_code(code, con)) %>%
       dplyr::select(-code)
 }
 
@@ -115,7 +115,7 @@ prepare_category_table_table <- function(con) {
 prepare_table_dimensions_table <- function(con){
   data.frame(code = rep(c("DP", "ZPIZ", "ZZZS", "OB", "KBJF"), 2)) %>%
     dplyr::rowwise() %>%
-    dplyr::mutate(table_id = as.numeric(UMARaccessR::get_table_id_from_table_code(code, con)[1,1])) %>%
+    dplyr::mutate(table_id = UMARaccessR::get_table_id_from_table_code(code, con)) %>%
     dplyr::ungroup() %>%
     dplyr::mutate(dimension = rep(c("Konto", "Interval"), each = 5),
                   is_time = rep(0,10)) %>%
@@ -140,13 +140,13 @@ prepare_table_dimensions_table <- function(con){
 #' @export
 #'
 prepare_dimension_levels_table <- function(file_path, table_name, sheet_name, con) {
-  table_id <- UMARaccessR::get_table_id_from_table_code(table_name, con)[1,1]
-  dim_id <- UMARaccessR::get_dim_id_from_table_id(as.numeric(table_id), "Konto", con)[1,1]
+  table_id <- UMARaccessR::get_table_id_from_table_code(table_name, con)
+  dim_id <- UMARaccessR::get_dim_id_from_table_id(table_id, "Konto", con)
   df <- mf_excel_parser(file_path, table_name, sheet_name)[[3]]
   df %>%
-    dplyr::mutate(tab_dim_id = as.numeric(dim_id)) %>%
+    dplyr::mutate(tab_dim_id = dim_id) %>%
     dplyr::rename(level_value = code, level_text = description)
-  dim_id <- UMARaccessR::get_dim_id_from_table_id(as.numeric(table_id), "Interval", con)[1,1]
+  dim_id <- UMARaccessR::get_dim_id_from_table_id(table_id, "Interval", con)
   df %>%
     dplyr::bind_rows(data.frame(level_value = c("M", "A"),
               level_text = c("Mese\u010dno", "Letno"),
@@ -184,13 +184,13 @@ prepare_unit_table <- function(con) {
 #' @export
 
 prepare_series_table <- function(table_name, con){
-  tbl_id <- UMARaccessR::get_table_id_from_table_code(table_name, con)[1,1]
-  dim_id <- UMARaccessR::get_dim_id_from_table_id(as.numeric(tbl_id), "Konto", con)[1,1]
+  tbl_id <- UMARaccessR::get_table_id_from_table_code(table_name, con)
+  dim_id <- UMARaccessR::get_dim_id_from_table_id(tbl_id, "Konto", con)
 
   dplyr::tbl(con, "dimension_levels") %>%
-    dplyr::filter(tab_dim_id == as.numeric(dim_id)) %>%
+    dplyr::filter(tab_dim_id == dim_id) %>%
     dplyr::collect() %>%
-    dplyr::mutate(unit_id = UMARaccessR::get_unit_id_from_unit_name("eur", con)[1,1],
+    dplyr::mutate(unit_id = UMARaccessR::get_unit_id_from_unit_name("eur", con),
                   table_id = tbl_id) %>%
     dplyr::slice(rep(1:dplyr::n(), each = 2)) %>%
     dplyr::mutate(interval_id = rep(c("M", "A"), dplyr::n()/2)) %>%
@@ -201,5 +201,42 @@ prepare_series_table <- function(table_name, con){
     dplyr::mutate(code = paste0("MF--", table_name, "--", level_value, "--", interval_id)) %>%
     dplyr:: select(-tab_dim_id, -level_value) %>%
     dplyr::relocate(table_id, name_long, unit_id, code, interval_id)
+}
+
+
+
+
+#' Prepare table to insert into `series_levels` table
+#'
+#' Helper function that extracts the individual levels for each series and
+#' gets the correct dimension id for each one and the correct series id to
+#' keep with the constraints.
+#' Returns table ready to insert into the `series_levels`table with the
+#' db_writing family of functions.
+#'
+#'
+#' @param code_no the matrix code (e.g. 2300123S)
+#' @param con connection to the database
+#' @return a dataframe with the `series_id`, `tab_dim_id`, `value` columns
+#' all the series-level combinatins for this table.
+#' @export
+#'
+prepare_series_levels_table <- function(code_no, con) {
+  tbl_id <- UMARaccessR::get_table_id_from_table_code(table_name, con)[1,1]
+
+  SURSfetchR:::get_table_id("DP", con)
+  dplyr::tbl(con, "table_dimensions") %>%
+    dplyr::filter(table_id == tbl_id,
+                  is_time != TRUE) %>%
+    dplyr::pull(id) -> dimz
+
+  dplyr::tbl(con, "series") %>%
+    dplyr::filter(table_id == tbl_id) %>%
+    dplyr::collect() %>%
+    dplyr::select(table_id, id, code) %>%
+    tidyr::separate(code, into = c("x1", "x2", paste0(dimz), "x3"), sep = "--") %>%
+    dplyr::select(series_id = id,  paste0(dimz)) %>%
+    tidyr::pivot_longer(-series_id, names_to = "tab_dim_id") %>%
+    as.data.frame()
 }
 
