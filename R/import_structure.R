@@ -153,3 +153,53 @@ prepare_dimension_levels_table <- function(file_path, table_name, sheet_name, co
               tab_dim_id = c(dim_id, dim_id)))
 }
 
+
+#' Prepare table to insert into `units` table
+#'
+#' Helper function that manually prepares the unit row.
+#' Returns table ready to insert into the `units`table with the
+#' db_writing family of functions.
+#'
+#' @param con connection to the database
+#' @return a dataframe with the single column containing the different units used
+#' in this table.
+#' @export
+#'
+prepare_unit_table <- function(con) {
+  data.frame(name = "eur")
+}
+
+
+
+#' Prepare table to insert into `series` table
+#'
+#'
+#'
+#' @param table_name character string e.g. "DP"
+#' @param con connection to the database
+#'
+#' @return a dataframe with the following columns: `name_long`, `code`,
+#' `unit_id`, `table_id` and `interval_id`for each series in the table
+#' well as the same number of rows as there are series
+#' @export
+
+prepare_series_table <- function(table_name, con){
+  tbl_id <- UMARaccessR::get_table_id_from_table_code(table_name, con)[1,1]
+  dim_id <- UMARaccessR::get_dim_id_from_table_id(as.numeric(tbl_id), "Konto", con)[1,1]
+
+  dplyr::tbl(con, "dimension_levels") %>%
+    dplyr::filter(tab_dim_id == as.numeric(dim_id)) %>%
+    dplyr::collect() %>%
+    dplyr::mutate(unit_id = UMARaccessR::get_unit_id_from_unit_name("eur", con)[1,1],
+                  table_id = tbl_id) %>%
+    dplyr::slice(rep(1:dplyr::n(), each = 2)) %>%
+    dplyr::mutate(interval_id = rep(c("M", "A"), dplyr::n()/2)) %>%
+    dplyr::rename(name_long = level_text)  %>%
+    dplyr::rowwise() %>%
+    dplyr::mutate(name_long = ifelse(interval_id == "M", paste(name_long, "-- Mese\u010dno"),
+                              paste(name_long, "-- Letno"))) %>%
+    dplyr::mutate(code = paste0("MF--", table_name, "--", level_value, "--", interval_id)) %>%
+    dplyr:: select(-tab_dim_id, -level_value) %>%
+    dplyr::relocate(table_id, name_long, unit_id, code, interval_id)
+}
+

@@ -19,6 +19,10 @@ dittodb::with_mock_db({
     expect_equal(df$table_id[1], 24)
     df <- prepare_table_dimensions_table(con)
     expect_equal(dim(df), c(10,3))
+    df <- prepare_unit_table(con)
+    expect_equal(dim(df), c(1,1))
+    df <- prepare_series_table("ZPIZ", con)
+    expect_equal(dim(df), c(380,5))
   })
 })
 
