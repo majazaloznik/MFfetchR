@@ -4,10 +4,10 @@
 \alias{prepare_series_levels_table}
 \title{Prepare table to insert into `series_levels` table}
 \usage{
-prepare_series_levels_table(code_no, con)
+prepare_series_levels_table(table_name, con)
 }
 \arguments{
-\item{code_no}{the matrix code (e.g. 2300123S)}
+\item{table_name}{the table name (eg "DP")}
 
 \item{con}{connection to the database}
 }

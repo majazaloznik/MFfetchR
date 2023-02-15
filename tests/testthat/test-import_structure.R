@@ -23,6 +23,8 @@ dittodb::with_mock_db({
     expect_equal(dim(df), c(1,1))
     df <- prepare_series_table("ZPIZ", con)
     expect_equal(dim(df), c(380,5))
+    df <- prepare_series_levels_table("ZPIZ", con)
+    expect_equal(dim(df), c(760,3))
   })
 })
 

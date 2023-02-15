@@ -215,26 +215,24 @@ prepare_series_table <- function(table_name, con){
 #' db_writing family of functions.
 #'
 #'
-#' @param code_no the matrix code (e.g. 2300123S)
+#' @param table_name the table name (eg "DP")
 #' @param con connection to the database
 #' @return a dataframe with the `series_id`, `tab_dim_id`, `value` columns
 #' all the series-level combinatins for this table.
 #' @export
 #'
-prepare_series_levels_table <- function(code_no, con) {
-  tbl_id <- UMARaccessR::get_table_id_from_table_code(table_name, con)[1,1]
+prepare_series_levels_table <- function(table_name, con) {
+  tbl_id <- UMARaccessR::get_table_id_from_table_code(table_name, con)
 
-  SURSfetchR:::get_table_id("DP", con)
   dplyr::tbl(con, "table_dimensions") %>%
-    dplyr::filter(table_id == tbl_id,
-                  is_time != TRUE) %>%
+    dplyr::filter(table_id == tbl_id) %>%
     dplyr::pull(id) -> dimz
 
   dplyr::tbl(con, "series") %>%
     dplyr::filter(table_id == tbl_id) %>%
     dplyr::collect() %>%
     dplyr::select(table_id, id, code) %>%
-    tidyr::separate(code, into = c("x1", "x2", paste0(dimz), "x3"), sep = "--") %>%
+    tidyr::separate(code, into = c("x1", "x2", paste0(dimz)), sep = "--") %>%
     dplyr::select(series_id = id,  paste0(dimz)) %>%
     tidyr::pivot_longer(-series_id, names_to = "tab_dim_id") %>%
     as.data.frame()
