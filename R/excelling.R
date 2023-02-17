@@ -57,7 +57,8 @@ mf_excel_parser <- function(file_path, table_name, sheet_name){
   suppressWarnings(data_clean %>%
     dplyr::mutate(across(c(4:ncol(data_clean)), as.numeric)) %>%
     dplyr::rowwise() %>%
-    dplyr::mutate(code = ifelse(is.na(code), konto_codes(description), code)) %>%
+    dplyr::mutate(code = ifelse(!is.na(match(description, konto_codes$description)),
+                                 konto_codes$code[match(description, konto_codes$description)], code)) %>%
     dplyr::select(-delete, -description_eng)  -> data_clean)
 
   # harcode: remove second konto code 7505 if it exists (zzzs), the one where
