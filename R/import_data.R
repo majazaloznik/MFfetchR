@@ -22,9 +22,9 @@
 #'
 
 prepare_vintage_table <- function(file_path, table_name, sheet_name, con){
-  l <- mf_excel_parser(file_path, table_name, sheet_name)
-  new_month <- dplyr::arrange(l[[1]], period_id) %>% dplyr::summarise(max = max(period_id)) %>% dplyr::pull()
-  new_year <- dplyr::arrange(l[[2]], period_id) %>% dplyr::summarise(max = max(period_id)) %>% dplyr::pull()
+  parsed_data <- mf_excel_parser(file_path, table_name, sheet_name)
+  new_month <- dplyr::arrange(parsed_data[[1]], period_id) %>% dplyr::summarise(max = max(period_id)) %>% dplyr::pull()
+  new_year <- dplyr::arrange(parsed_data[[2]], period_id) %>% dplyr::summarise(max = max(period_id)) %>% dplyr::pull()
   tbl_id <-  UMARaccessR::get_table_id_from_table_code(table_name, con)
   # get first two series last vintages if they exist. (M & A)
   series_ids <- dplyr::tbl(con, "series") %>%
@@ -62,20 +62,19 @@ prepare_vintage_table <- function(file_path, table_name, sheet_name, con){
         monthly_vintages <- vintage_table("M", tbl_id, con)
       }
     }
-  mget(c("monthly_vintages", "annual_vintages"))
+  mget(c("monthly_vintages", "annual_vintages", "parsed_data"))
 }
 
 #' Prepare vintage table for M or A
 #'
-#' Helper funciton preparing for the vintage table for a specific table
-#' and either the montlhy or the annual data. Uses current time as `published`
-#'
+#' Helper function preparing for the vintage table for a specific table
+#' and either the monthly or the annual data. Uses current time as `published`
 #'
 #' @param interval "M" or "A"
 #' @param tbl_id numeric table id
 #' @param con connection to the database.
 #'
-#' @return data frame with series_id and published columns
+#' @return data frame with `series_id` and `published` columns
 #' @keywords internal
 
 vintage_table <- function(interval, tbl_id, con) {
@@ -85,4 +84,37 @@ vintage_table <- function(interval, tbl_id, con) {
     dplyr::select(series_id=id) %>%
     dplyr::collect() %>%
     dplyr::mutate(published = Sys.time())
+}
+
+
+
+#' Get and prepare data for import
+#'
+#' Prepares the timeseries data for importing into the database.
+#'
+#' @param con connection to database
+#' @param parsed_data list with at least monthly and annual dataframes with the data_points
+#' output of \link[MFfetchR]{mf_excel_parser}.
+#'
+#' @return a dataframe with the period_id, value and id values for all the vintages in the table.
+#'
+#' @export
+prepare_data_table <- function(parsed_data, con){
+  # get table name
+  tbl_name <- regmatches(parsed_data$monthly$code[1],
+                         regexpr("(?<=--).*?(?=--)",
+                                 parsed_data$monthly$code[1], perl = TRUE))
+  tbl_id <- UMARaccessR::get_table_id_from_table_code(tbl_name, con)
+  series_lookup <- dplyr::tbl(con, "series") %>%
+    dplyr::filter(table_id == tbl_id) %>%
+    dplyr::select(id, code) %>%
+    dplyr::collect()
+
+  parsed_data$monthly %>%
+    dplyr::left_join(series_lookup) %>%
+    dplyr::select(-code) %>%
+    dplyr::bind_rows(
+      parsed_data$annual %>%
+        dplyr::left_join(series_lookup) %>%
+        dplyr::select(-code))
 }

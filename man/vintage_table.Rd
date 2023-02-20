@@ -14,10 +14,10 @@ vintage_table(interval, tbl_id, con)
 \item{con}{connection to the database.}
 }
 \value{
-data frame with series_id and published columns
+data frame with `series_id` and `published` columns
 }
 \description{
-Helper funciton preparing for the vintage table for a specific table
-and either the montlhy or the annual data. Uses current time as `published`
+Helper function preparing for the vintage table for a specific table
+and either the monthly or the annual data. Uses current time as `published`
 }
 \keyword{internal}

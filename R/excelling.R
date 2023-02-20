@@ -89,6 +89,5 @@ mf_excel_parser <- function(file_path, table_name, sheet_name){
     dplyr::arrange(code, period_id)
   annual <- tidyr::pivot_longer(annual, !period_id, names_to = "code", values_to = "value") %>%
     dplyr::arrange(code, period_id)
-
-  return(list(monthly, annual, series))
+  mget(c("monthly", "annual", "series"))
 }

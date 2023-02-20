@@ -47,3 +47,39 @@ insert_new_table_structures <- function(meta, con) {
                                 "insert_new_series_levels",
                                 unname(as.list(purrr::map(meta$table_name, prepare_series_levels_table, con) %>% purrr::list_rbind())))
 }
+
+
+
+#' Insert new data for a table i.e. a vintage
+#'
+#' When new data for a table (one of the Excel's) is added, these are new
+#' vintages. This function inserts a set of new vintages and their corresponding
+#' data points to the database.
+#'
+#' @param file_path path to excel file
+#' @param table_name name of table
+#' @param sheet_name name of sheet
+#' @param con connection to database
+#'
+#' @return list of tables with counts for each inserted row.
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' purrr::walk(master_list_surs$code, ~insert_new_data(.x, con))
+#' }
+insert_new_data <- function(file_path, table_name, sheet_name, con) {
+  l <- prepare_vintage_table(file_path, table_name, sheet_name, con)
+# insert monthly data
+  res <- list()
+  res[[1]] <- SURSfetchR::sql_function_call(con,
+                                "insert_new_vintage",
+                                as.list(l$monthly_vintages))
+  res[[2]] <- SURSfetchR::sql_function_call(con,
+                                            "insert_new_vintage",
+                                            as.list(l$annual_vintages))
+
+
+
+  lapply(res, sum)
+}
