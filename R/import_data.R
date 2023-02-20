@@ -10,37 +10,79 @@
 #' Returns table ready to insert into the `vintage`table with the
 #' db_writing family of functions.
 #'
+#' @param file_path path to excel file
+#' @param table_name name of table
+#' @param sheet_name name of sheet
+#' @param con connection to database
 #'
 #'
 #' @return a dataframe with the `series_id` and `published` columns
 #' for all the series in this table.
 #' @export
 #'
-#
-# prepare_vintage_table <- function(file_path, table_name, sheet_name, con){
-#   get_table_id(code_no, con) -> tbl_id
-#   get_px_metadata(code_no)$updated -> published
-#   get_last_publication_date(tbl_id, con) -> last_published
-#   if(identical(published, last_published)) {
-#     stop(paste0("These vintages for table ", code_no,
-#                 "are not new, they will not be inserted again."))
-#   } else {
-#     get_time_dimension(code_no, con) -> time_dimension
-#     get_interval_id(time_dimension) -> interval_id
-#     expand_to_level_codes(code_no, con) -> expanded_level_codes
-#     expanded_level_codes %>%
-#       tidyr::unite("series_code", dplyr::starts_with("Var"), sep = "--") %>%
-#       dplyr::mutate(series_code = paste0("SURS--", code_no, "--",
-#                                          series_code, "--",interval_id)) -> x
-#     get_series_id(x$series_code, con) -> series_ids
-#     get_series_id_from_table(tbl_id, con) -> double_check
-#     if(isTRUE(all.equal(sort(series_ids), sort(double_check)))){
-#       data.frame(series_id = series_ids,
-#                  published = published) } else {
-#                    warning(paste("The newly published data in table", code_no,
-#                                  "seems to have a different structure to the series already",
-#                                  "in the database. The vintages were not imported, update",
-#                                  "the series table first."))}
-#   }
-# }
-#
+
+prepare_vintage_table <- function(file_path, table_name, sheet_name, con){
+  l <- mf_excel_parser(file_path, table_name, sheet_name)
+  new_month <- dplyr::arrange(l[[1]], period_id) %>% dplyr::summarise(max = max(period_id)) %>% dplyr::pull()
+  new_year <- dplyr::arrange(l[[2]], period_id) %>% dplyr::summarise(max = max(period_id)) %>% dplyr::pull()
+  tbl_id <-  UMARaccessR::get_table_id_from_table_code(table_name, con)
+  # get first two series last vintages if they exist. (M & A)
+  series_ids <- dplyr::tbl(con, "series") %>%
+    dplyr::filter(table_id == tbl_id) %>%
+    dplyr::slice_min(id, n = 2) %>%
+    dplyr::select(id) %>% dplyr::pull() %>%
+    as.numeric()
+  vint_id_m <- UMARaccessR::get_vintage_from_series(series_ids[1], con)[1,1]
+  vint_id_a <- UMARaccessR::get_vintage_from_series(series_ids[2], con)[1,1]
+  if(is.na(vint_id_a)){
+    annual_vintages <- vintage_table("A", tbl_id, con)} else {
+      # get latest period from latest vintage
+      max_year <- dplyr::tbl(con, "data_points") %>%
+        dplyr::filter(vintage_id == vint_id_a) %>%
+        dplyr::slice_max(period_id) %>%
+        dplyr::pull(period_id)
+      if(identical(max_year, new_year)) {
+        stop(paste0("These vintages for table ", code_no,
+                    "are not new, they will not be inserted again."))
+      } else {
+        annual_vintages <- vintage_table("A", tbl_id, con)}
+    }
+
+  if(is.na(vint_id_m)){
+    monthly_vintages <- vintage_table("M", tbl_id, con)} else {
+      # get latest period from latest vintage
+      max_month <- dplyr::tbl(con, "data_points") %>%
+        dplyr::filter(vintage_id == vint_id_m) %>%
+        dplyr::slice_max(period_id) %>%
+        dplyr::pull(period_id)
+      if(identical(max_year, new_year)) {
+        stop(paste0("These vintages for table ", code_no,
+                    "are not new, they will not be inserted again."))
+      } else {
+        monthly_vintages <- vintage_table("M", tbl_id, con)
+      }
+    }
+  mget(c("monthly_vintages", "annual_vintages"))
+}
+
+#' Prepare vintage table for M or A
+#'
+#' Helper funciton preparing for the vintage table for a specific table
+#' and either the montlhy or the annual data. Uses current time as `published`
+#'
+#'
+#' @param interval "M" or "A"
+#' @param tbl_id numeric table id
+#' @param con connection to the database.
+#'
+#' @return data frame with series_id and published columns
+#' @keywords internal
+
+vintage_table <- function(interval, tbl_id, con) {
+  dplyr::tbl(con, "series") %>%
+    dplyr::filter(table_id == tbl_id,
+                  interval_id == interval) %>%
+    dplyr::select(series_id=id) %>%
+    dplyr::collect() %>%
+    dplyr::mutate(published = Sys.time())
+}
