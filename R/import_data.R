@@ -105,16 +105,18 @@ prepare_data_table <- function(parsed_data, con){
                          regexpr("(?<=--).*?(?=--)",
                                  parsed_data$monthly$code[1], perl = TRUE))
   tbl_id <- UMARaccessR::get_table_id_from_table_code(tbl_name, con)
-  series_lookup <- dplyr::tbl(con, "series") %>%
+  vintage_lookup <- dplyr::tbl(con, "series") %>%
     dplyr::filter(table_id == tbl_id) %>%
-    dplyr::select(id, code) %>%
+    dplyr::select(series_id = id, code) %>%
+    dplyr::left_join(dplyr::tbl(con, "vintage"), by = "series_id") %>%
+    dplyr::select(-series_id, -published) %>%
     dplyr::collect()
 
   parsed_data$monthly %>%
-    dplyr::left_join(series_lookup) %>%
+    dplyr::left_join(vintage_lookup) %>%
     dplyr::select(-code) %>%
     dplyr::bind_rows(
       parsed_data$annual %>%
-        dplyr::left_join(series_lookup) %>%
+        dplyr::left_join(vintage_lookup) %>%
         dplyr::select(-code))
 }

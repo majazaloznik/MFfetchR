@@ -83,3 +83,57 @@ insert_new_data <- function(file_path, table_name, sheet_name, con) {
 
   lapply(res, sum)
 }
+
+
+
+
+#' Insert datapoints into data_point table
+#'
+#'
+#' So, the function extracts and preps the data with \link[MFfetchR]{prepare_data_table}
+#' and writes it to a temporary table in the database.
+#'
+#' It inserts any new periods into the period table,
+#' adds the data points to the data point table.
+#' @param parsed_data list with at least monthly and annual dataframes with the data_points
+#' output of \link[MFfetchR]{mf_excel_parser}.
+#' @param con connection to database
+#'
+#' @return nothing, just some printing along the way
+#' @export
+#'
+insert_data_points <- function(parsed_data, con){
+  on.exit(dbExecute(con, sprintf("drop table tmp")))
+  df <- prepare_data_table(parsed_data, con)
+
+  dbWriteTable(con,
+               "tmp",
+               df,
+               temporary = TRUE,
+               overwrite = TRUE)
+
+  dbExecute(con, sprintf("alter table \"tmp\" add \"interval_id\" varchar"))
+
+  # add interval_id so i can check if the periods are new and need adding
+  dbExecute(con,           "
+    update  \"tmp\"
+    set  \"interval_id\" =  CASE WHEN (LENGTH(\"tmp\".\"period_id\") = 4.0) then 'A' else 'M' end
+  ")
+
+  # insert into period table periods that are not already in there.
+  x <- dbExecute(con, sprintf("insert into %s.period
+                       select distinct on (\"period_id\") \"period_id\", tmp.interval_id from tmp
+                       left join %s.period on period_id = period.id
+                       on conflict do nothing",
+                       dbQuoteIdentifier(con, "test_platform"),
+                       dbQuoteIdentifier(con, "test_platform")))
+  print(paste(x, "new rows inserted into the period table"))
+
+  # insert data into main data_point table
+  x <- dbExecute(con, sprintf("insert into %s.data_points
+                       select id, period_id, value from tmp
+                       on conflict do nothing",
+                       dbQuoteIdentifier(con, "test_platform")))
+  print(paste(x, "new rows inserted into the data_points table"))
+
+}
