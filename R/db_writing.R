@@ -79,7 +79,7 @@ insert_new_data <- function(file_path, table_name, sheet_name, con) {
                                             "insert_new_vintage",
                                             as.list(l$annual_vintages))
 
-
+  insert_data_points(l[[3]], con)
 
   lapply(res, sum)
 }

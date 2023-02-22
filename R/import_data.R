@@ -42,7 +42,7 @@ prepare_vintage_table <- function(file_path, table_name, sheet_name, con){
         dplyr::slice_max(period_id) %>%
         dplyr::pull(period_id)
       if(identical(max_year, new_year)) {
-        stop(paste0("These vintages for table ", code_no,
+        stop(paste0("These vintages for table ", table_name,
                     "are not new, they will not be inserted again."))
       } else {
         annual_vintages <- vintage_table("A", tbl_id, con)}
@@ -55,8 +55,8 @@ prepare_vintage_table <- function(file_path, table_name, sheet_name, con){
         dplyr::filter(vintage_id == vint_id_m) %>%
         dplyr::slice_max(period_id) %>%
         dplyr::pull(period_id)
-      if(identical(max_year, new_year)) {
-        stop(paste0("These vintages for table ", code_no,
+      if(identical(max_month, new_month)) {
+        stop(paste0("These vintages for table ", table_name,
                     "are not new, they will not be inserted again."))
       } else {
         monthly_vintages <- vintage_table("M", tbl_id, con)
@@ -109,8 +109,9 @@ prepare_data_table <- function(parsed_data, con){
     dplyr::filter(table_id == tbl_id) %>%
     dplyr::select(series_id = id, code) %>%
     dplyr::left_join(dplyr::tbl(con, "vintage"), by = "series_id") %>%
-    dplyr::select(-series_id, -published) %>%
-    dplyr::collect()
+    dplyr::collect() %>%
+    dplyr::group_by(series_id) %>%
+    dplyr::slice_max(published)
 
   parsed_data$monthly %>%
     dplyr::left_join(vintage_lookup) %>%
@@ -118,5 +119,6 @@ prepare_data_table <- function(parsed_data, con){
     dplyr::bind_rows(
       parsed_data$annual %>%
         dplyr::left_join(vintage_lookup) %>%
-        dplyr::select(-code))
+        dplyr::select(-code)) %>%
+    dplyr::select(-series_id, -published)->x
 }

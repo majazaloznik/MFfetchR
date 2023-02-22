@@ -6,6 +6,12 @@
 \usage{
 insert_data_points(parsed_data, con)
 }
+\arguments{
+\item{parsed_data}{list with at least monthly and annual dataframes with the data_points
+output of \link[MFfetchR]{mf_excel_parser}.}
+
+\item{con}{connection to database}
+}
 \value{
 nothing, just some printing along the way
 }

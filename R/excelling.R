@@ -57,7 +57,7 @@ mf_excel_parser <- function(file_path, table_name, sheet_name){
   suppressWarnings(data_clean %>%
     dplyr::mutate(across(c(4:ncol(data_clean)), as.numeric)) %>%
     dplyr::rowwise() %>%
-    dplyr::mutate(code = ifelse(!is.na(match(description, konto_codes$description)),
+    dplyr::mutate(code = ifelse(!is.na(match(description, konto_codes$description)) & is.na(code),
                                  konto_codes$code[match(description, konto_codes$description)], code)) %>%
     dplyr::select(-delete, -description_eng)  -> data_clean)
 
@@ -71,7 +71,7 @@ mf_excel_parser <- function(file_path, table_name, sheet_name){
   series <- data_clean %>% dplyr::select(code, description)
   # transpose
   df <- as.data.frame(t(data_clean[,-2]))
-  colnames(df) <- paste0("MF--", table_name, "--", trim_leading(df[1,]))
+  colnames(df) <- paste0("MF--", table_name, "--", trim_leading(format(df[1,], scientific = FALSE)))
   df <- df[-1,]
 
   df$period_id <- row.names(df)
