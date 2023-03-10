@@ -37,10 +37,10 @@ mf_excel_parser <- function(file_path, table_name, sheet_name){
   # make sure they are all in the same, get month codes and clean up
   # all period codes.
   header <- apply(header,2,  function(x) if(is.na(x[2])) x[2:1] else x)[2:1,] %>%
-    apply(2, function(x) if(is.na(x[2])) x else c(x[1], month_codes(x[2]))) %>%
+    apply(2, function(x) if(is.na(x[2])) x else c(x[1], MFfetchR:::month_codes(x[2]))) %>%
     as.data.frame() %>%
     dplyr::summarise(dplyr::across(everything(), ~ paste(.x[!is.na(.x)], collapse ="" ))) %>%
-    dplyr::summarise(dplyr::across(everything(), ~ trim_inter(.x)))
+    dplyr::summarise(dplyr::across(everything(), ~  MFfetchR:::trim_inter(.x)))
 
   # read all the data in without the header
   data_raw <- readxl::read_excel(file_path, sheet_name,
@@ -59,7 +59,10 @@ mf_excel_parser <- function(file_path, table_name, sheet_name){
     dplyr::rowwise() %>%
     dplyr::mutate(code = ifelse(!is.na(match(description, konto_codes$description)) & is.na(code),
                                  konto_codes$code[match(description, konto_codes$description)], code)) %>%
-    dplyr::select(-delete, -description_eng)  -> data_clean)
+      dplyr::ungroup() %>%
+      dplyr::mutate(order =  dplyr::row_number()) %>%
+    dplyr::select(-delete, -description_eng)  %>%
+      dplyr::relocate(order) -> data_clean)
 
   # harcode: remove second konto code 7505 if it exists (zzzs), the one where
   # all the values are either zero or NA.
@@ -70,9 +73,9 @@ mf_excel_parser <- function(file_path, table_name, sheet_name){
 
   series <- data_clean %>% dplyr::select(code, description)
   # transpose
-  df <- as.data.frame(t(data_clean[,-2]))
-  colnames(df) <- paste0("MF--", table_name, "--", trim_leading(format(df[1,], scientific = FALSE)))
-  df <- df[-1,]
+  df <- as.data.frame(t(data_clean[,-3]))
+  colnames(df) <- paste0("MF--", table_name, "--", sprintf("%03d",as.integer(df[1,])), "--", MFfetchR:::trim_leading(format(df[2,], scientific = FALSE)))
+  df <- df[-c(1, 2),]
 
   df$period_id <- row.names(df)
 
