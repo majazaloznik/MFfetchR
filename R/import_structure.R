@@ -183,14 +183,16 @@ prepare_unit_table <- function(con) {
 #' well as the same number of rows as there are series
 #' @export
 
-prepare_series_table <- function(table_name, con){
+
+prepare_series_table <- function(file_path, table_name, sheet_name, con){
   tbl_id <- UMARaccessR::get_table_id_from_table_code(table_name, con)
   dim_id <- UMARaccessR::get_dim_id_from_table_id(tbl_id, "Konto", con)
+  df <- mf_excel_parser(file_path, table_name, sheet_name)[[3]]
 
   dplyr::tbl(con, "dimension_levels") %>%
     dplyr::filter(tab_dim_id == dim_id) %>%
     dplyr::collect() %>%
-    dplyr::mutate(unit_id = UMARaccessR::get_unit_id_from_unit_name("eur", con),
+    dplyr::mutate(unit_id = UMARaccessR::get_unit_id_from_unit_name("eur", con)[[1]],
                   table_id = tbl_id) %>%
     dplyr::slice(rep(1:dplyr::n(), each = 2)) %>%
     dplyr::mutate(interval_id = rep(c("M", "A"), dplyr::n()/2)) %>%

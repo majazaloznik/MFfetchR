@@ -1,8 +1,8 @@
 
 #' MF Excel table parser
 #'
-#' Parsing function to extract and clean up the bundget timeseries data in
-#' the Ministry of Finance excel spreasheets usually published [here](https://www.gov.si/teme/fiskalna-in-javnofinancna-politika/).
+#' Parsing function to extract and clean up the budget timeseries data in
+#' the Ministry of Finance excel spreadsheets usually published [here](https://www.gov.si/teme/fiskalna-in-javnofinancna-politika/).
 #' The parser works on 5 tables with untidy budget account data, furthermore
 #' the tables have errors and inconsistencies. The parser first extracts the header
 #' because it has 2-3 rows, then the data. Cleaning up the empty rows, adding
@@ -68,7 +68,7 @@ mf_excel_parser <- function(file_path, table_name, sheet_name){
   # all the values are either zero or NA.
   if(nrow(dplyr::filter(data_clean, code == 7505)) == 2){
     data_clean <- data_clean %>%
-      dplyr::filter(!(code == 7505  & dplyr::if_all(c(-code, -description), ~ .x == 0 | is.na(.x)  )))
+      dplyr::filter(!(code == 7505  & dplyr::if_all(c(-order, -code, -description), ~ .x == 0 | is.na(.x)  )))
   }
 
   series <- data_clean %>% dplyr::select(code, description)
