@@ -16,10 +16,10 @@ insert_new_table_structures <- function(meta, con) {
 
   SURSfetchR::sql_function_call(con,
                                 "insert_new_category",
-                                as.list(prepare_category_table()))
+                                as.list(prepare_category_table(con)))
   SURSfetchR::sql_function_call(con,
                                 "insert_new_table",
-                                as.list(prepare_table_table()))
+                                as.list(prepare_table_table(con)))
   SURSfetchR::sql_function_call(con,
                                 "insert_new_category_relationship",
                                 as.list(prepare_category_relationship_table()))
@@ -41,7 +41,7 @@ insert_new_table_structures <- function(meta, con) {
 
   SURSfetchR::sql_function_call(con,
                                 "insert_new_series",
-                                unname(as.list(purrr::map(meta$table_name, prepare_series_table, con) %>% purrr::list_rbind())))
+                                unname(as.list(purrr::pmap(meta, MFfetchR::prepare_series_table, con) %>% purrr::list_rbind())))
 
   SURSfetchR::sql_function_call(con,
                                 "insert_new_series_levels",
