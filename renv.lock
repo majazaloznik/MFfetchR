@@ -132,8 +132,8 @@
       "RemoteRepo": "UMARvisualisR",
       "RemoteUsername": "majazaloznik",
       "RemoteRef": "HEAD",
-      "RemoteSha": "a19d1788e7631fa3427914ab8cb7b6903010d48d",
-      "Hash": "03cd67518e184cb5d37d0e7abac76fb8",
+      "RemoteSha": "abf9ce3ff6b087120df6e3e5365795860f65ba06",
+      "Hash": "672eec641593f0a4569c561ecabdfe1c",
       "Requirements": [
         "DBI",
         "RPostgres",
