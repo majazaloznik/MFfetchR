@@ -4,7 +4,7 @@
 \alias{prepare_series_table}
 \title{Prepare table to insert into `series` table}
 \usage{
-prepare_series_table(table_name, con)
+prepare_series_table(file_path, table_name, sheet_name, con)
 }
 \arguments{
 \item{table_name}{character string e.g. "DP"}

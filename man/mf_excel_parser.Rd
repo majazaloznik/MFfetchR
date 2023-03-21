@@ -17,8 +17,8 @@ mf_excel_parser(file_path, table_name, sheet_name)
 list of three tables: annual and monthly series and the series codelist
 }
 \description{
-Parsing function to extract and clean up the bundget timeseries data in
-the Ministry of Finance excel spreasheets usually published [here](https://www.gov.si/teme/fiskalna-in-javnofinancna-politika/).
+Parsing function to extract and clean up the budget timeseries data in
+the Ministry of Finance excel spreadsheets usually published [here](https://www.gov.si/teme/fiskalna-in-javnofinancna-politika/).
 The parser works on 5 tables with untidy budget account data, furthermore
 the tables have errors and inconsistencies. The parser first extracts the header
 because it has 2-3 rows, then the data. Cleaning up the empty rows, adding

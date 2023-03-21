@@ -175,7 +175,9 @@ prepare_unit_table <- function(con) {
 #'
 #'
 #'
-#' @param table_name character string e.g. "DP"
+#' @param file_path path to the excel file
+#' @param table_name character string of table code
+#' @param sheet_name character string of sheet name with table in excel.
 #' @param con connection to the database
 #'
 #' @return a dataframe with the following columns: `name_long`, `code`,
@@ -189,19 +191,20 @@ prepare_series_table <- function(file_path, table_name, sheet_name, con){
   dim_id <- UMARaccessR::get_dim_id_from_table_id(tbl_id, "Konto", con)
   df <- mf_excel_parser(file_path, table_name, sheet_name)[[3]]
 
-  dplyr::tbl(con, "dimension_levels") %>%
-    dplyr::filter(tab_dim_id == dim_id) %>%
-    dplyr::collect() %>%
+  df %>%
+    dplyr::rename(level_value = code, level_text = description) %>%
     dplyr::mutate(unit_id = UMARaccessR::get_unit_id_from_unit_name("eur", con)[[1]],
-                  table_id = tbl_id) %>%
+                  table_id = tbl_id,
+                  order = row_number()) %>%
     dplyr::slice(rep(1:dplyr::n(), each = 2)) %>%
     dplyr::mutate(interval_id = rep(c("M", "A"), dplyr::n()/2)) %>%
     dplyr::rename(name_long = level_text)  %>%
     dplyr::rowwise() %>%
     dplyr::mutate(name_long = ifelse(interval_id == "M", paste(name_long, "-- Mese\u010dno"),
                               paste(name_long, "-- Letno"))) %>%
-    dplyr::mutate(code = paste0("MF--", table_name, "--", level_value, "--", interval_id)) %>%
-    dplyr:: select(-tab_dim_id, -level_value) %>%
+    dplyr::mutate(code = paste0("MF--", table_name, "--",sprintf("%03d",as.integer(order)),
+                                "--", MFfetchR:::trim_leading(format(level_value, scientific = FALSE)), "--", interval_id)) %>%
+    dplyr:: select(-level_value, -order) %>%
     dplyr::relocate(table_id, name_long, unit_id, code, interval_id)
 }
 
