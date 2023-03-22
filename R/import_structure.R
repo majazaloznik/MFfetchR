@@ -143,8 +143,9 @@ prepare_dimension_levels_table <- function(file_path, table_name, sheet_name, co
   table_id <- UMARaccessR::get_table_id_from_table_code(table_name, con)
   dim_id <- UMARaccessR::get_dim_id_from_table_id(table_id, "Konto", con)
   df <- mf_excel_parser(file_path, table_name, sheet_name)[[3]]
-  df %>%
+  df <- df %>%
     dplyr::mutate(tab_dim_id = dim_id) %>%
+    dplyr::mutate(code = sub(".*[--]", "", code)) %>%
     dplyr::rename(level_value = code, level_text = description)
   dim_id <- UMARaccessR::get_dim_id_from_table_id(table_id, "Interval", con)
   df %>%
@@ -192,7 +193,7 @@ prepare_series_table <- function(file_path, table_name, sheet_name, con){
   df <- mf_excel_parser(file_path, table_name, sheet_name)[[3]]
 
   df %>%
-    dplyr::rename(level_value = code, level_text = description) %>%
+    dplyr::rename(level_text = description) %>%
     dplyr::mutate(unit_id = UMARaccessR::get_unit_id_from_unit_name("eur", con)[[1]],
                   table_id = tbl_id,
                   order = row_number()) %>%
@@ -202,9 +203,7 @@ prepare_series_table <- function(file_path, table_name, sheet_name, con){
     dplyr::rowwise() %>%
     dplyr::mutate(name_long = ifelse(interval_id == "M", paste(name_long, "-- Mese\u010dno"),
                               paste(name_long, "-- Letno"))) %>%
-    dplyr::mutate(code = paste0("MF--", table_name, "--",sprintf("%03d",as.integer(order)),
-                                "--", MFfetchR:::trim_leading(format(level_value, scientific = FALSE)), "--", interval_id)) %>%
-    dplyr:: select(-level_value, -order) %>%
+    dplyr:: select(-order) %>%
     dplyr::relocate(table_id, name_long, unit_id, code, interval_id)
 }
 

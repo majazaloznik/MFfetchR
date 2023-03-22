@@ -60,26 +60,30 @@ mf_excel_parser <- function(file_path, table_name, sheet_name){
     dplyr::mutate(code = ifelse(!is.na(match(description, konto_codes$description)) & is.na(code),
                                  konto_codes$code[match(description, konto_codes$description)], code)) %>%
       dplyr::ungroup() %>%
-      dplyr::mutate(order =  dplyr::row_number()) %>%
-    dplyr::select(-delete, -description_eng)  %>%
-      dplyr::relocate(order) -> data_clean)
+    dplyr::select(-delete, -description_eng) -> data_clean)
 
   # harcode: remove second konto code 7505 if it exists (zzzs), the one where
   # all the values are either zero or NA.
   if(nrow(dplyr::filter(data_clean, code == 7505)) == 2){
     data_clean <- data_clean %>%
-      dplyr::filter(!(code == 7505  & dplyr::if_all(c(-order, -code, -description), ~ .x == 0 | is.na(.x)  )))
+      dplyr::filter(!(code == 7505  & dplyr::if_all(c( -code, -description), ~ .x == 0 | is.na(.x)  )))
   }
+  data_clean <- data_clean %>%
+    dplyr::mutate(order =  dplyr::row_number()) %>%
+  dplyr::mutate(code = paste0("MF--", table_name, "--",sprintf("%03d",as.integer(order)),
+                              "--", MFfetchR:::trim_leading(format(code, scientific = FALSE)))) %>%
+    dplyr::relocate(order)
 
   series <- data_clean %>% dplyr::select(code, description)
   # transpose
   df <- as.data.frame(t(data_clean[,-3]))
-  colnames(df) <- paste0("MF--", table_name, "--", sprintf("%03d",as.integer(df[1,])), "--", MFfetchR:::trim_leading(format(df[2,], scientific = FALSE)))
+  colnames(df) <- df[2,]
   df <- df[-c(1, 2),]
 
   df$period_id <- row.names(df)
 
-  df <- df %>% dplyr::relocate(period_id)
+  df <- df %>% dplyr::relocate(period_id) %>%
+    dplyr::mutate(dplyr::across(!period_id, as.numeric))
 
   # split into annual and monthly datasets.
   monthly <- df[grep("\\d+M\\d+", df$period_id),]
