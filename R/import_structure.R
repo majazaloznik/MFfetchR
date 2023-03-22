@@ -203,6 +203,7 @@ prepare_series_table <- function(file_path, table_name, sheet_name, con){
     dplyr::rowwise() %>%
     dplyr::mutate(name_long = ifelse(interval_id == "M", paste(name_long, "-- Mese\u010dno"),
                               paste(name_long, "-- Letno"))) %>%
+    dplyr::mutate(code = paste0(code, "--", interval_id)) %>%
     dplyr:: select(-order) %>%
     dplyr::relocate(table_id, name_long, unit_id, code, interval_id)
 }
