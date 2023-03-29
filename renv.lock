@@ -58,14 +58,6 @@
       "Hash": "e749cae40fa9ef469b6050959517453c",
       "Requirements": []
     },
-    "Rttf2pt1": {
-      "Package": "Rttf2pt1",
-      "Version": "1.3.12",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "a60168d094ca7e4de5106d60001c3964",
-      "Requirements": []
-    },
     "SURSfetchR": {
       "Package": "SURSfetchR",
       "Version": "0.0.4",
@@ -109,8 +101,8 @@
       "RemoteRepo": "UMARaccessR",
       "RemoteUsername": "majazaloznik",
       "RemoteRef": "HEAD",
-      "RemoteSha": "3017ba6784c136870705b91c2cf2443e56f8fe68",
-      "Hash": "bbdeb2faffdc917e047625dce704c23e",
+      "RemoteSha": "e19e437969c757c779a48d026032bbb95bf1cc38",
+      "Hash": "2b4b1c4e1e0da944f6f2ebb12daded1e",
       "Requirements": [
         "DBI",
         "RPostgres",
@@ -120,31 +112,6 @@
         "openxlsx",
         "rlang",
         "stringr"
-      ]
-    },
-    "UMARvisualisR": {
-      "Package": "UMARvisualisR",
-      "Version": "0.1.0",
-      "Source": "GitHub",
-      "Remotes": "majazaloznik/UMARaccessR",
-      "RemoteType": "github",
-      "RemoteHost": "api.github.com",
-      "RemoteRepo": "UMARvisualisR",
-      "RemoteUsername": "majazaloznik",
-      "RemoteRef": "HEAD",
-      "RemoteSha": "abf9ce3ff6b087120df6e3e5365795860f65ba06",
-      "Hash": "672eec641593f0a4569c561ecabdfe1c",
-      "Requirements": [
-        "DBI",
-        "RPostgres",
-        "UMARaccessR",
-        "dplyr",
-        "magrittr",
-        "openxlsx",
-        "purrr",
-        "readr",
-        "stringr",
-        "zoo"
       ]
     },
     "askpass": {
@@ -537,25 +504,6 @@
       "Hash": "4b68aa51edd89a0e044a66e75ae3cc6c",
       "Requirements": []
     },
-    "extrafont": {
-      "Package": "extrafont",
-      "Version": "0.19",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "03d9939b37164f34e0522fef13e63158",
-      "Requirements": [
-        "Rttf2pt1",
-        "extrafontdb"
-      ]
-    },
-    "extrafontdb": {
-      "Package": "extrafontdb",
-      "Version": "1.0",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "a861555ddec7451c653b40e713166c6f",
-      "Requirements": []
-    },
     "fansi": {
       "Package": "fansi",
       "Version": "1.0.4",
@@ -810,14 +758,6 @@
         "Rcpp",
         "rlang"
       ]
-    },
-    "lattice": {
-      "Package": "lattice",
-      "Version": "0.20-45",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "b64cdbb2b340437c4ee047a1f4c4377b",
-      "Requirements": []
     },
     "lazyeval": {
       "Package": "lazyeval",
@@ -1171,26 +1111,6 @@
         "sessioninfo",
         "withr",
         "xopen"
-      ]
-    },
-    "readr": {
-      "Package": "readr",
-      "Version": "2.1.4",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "b5047343b3825f37ad9d3b5d89aa1078",
-      "Requirements": [
-        "R6",
-        "cli",
-        "clipr",
-        "cpp11",
-        "crayon",
-        "hms",
-        "lifecycle",
-        "rlang",
-        "tibble",
-        "tzdb",
-        "vroom"
       ]
     },
     "readxl": {
@@ -1582,16 +1502,6 @@
         "xfun"
       ]
     },
-    "tzdb": {
-      "Package": "tzdb",
-      "Version": "0.3.0",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "b2e1cbce7c903eaf23ec05c58e59fb5e",
-      "Requirements": [
-        "cpp11"
-      ]
-    },
     "urlchecker": {
       "Package": "urlchecker",
       "Version": "1.0.1",
@@ -1651,29 +1561,6 @@
         "glue",
         "lifecycle",
         "rlang"
-      ]
-    },
-    "vroom": {
-      "Package": "vroom",
-      "Version": "1.6.1",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "7015a74373b83ffaef64023f4a0f5033",
-      "Requirements": [
-        "bit64",
-        "cli",
-        "cpp11",
-        "crayon",
-        "glue",
-        "hms",
-        "lifecycle",
-        "progress",
-        "rlang",
-        "tibble",
-        "tidyselect",
-        "tzdb",
-        "vctrs",
-        "withr"
       ]
     },
     "waldo": {
@@ -1757,16 +1644,6 @@
       "Repository": "CRAN",
       "Hash": "c42bfcec3fa6a0cce17ce1f8bc684f88",
       "Requirements": []
-    },
-    "zoo": {
-      "Package": "zoo",
-      "Version": "1.8-11",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "874a5b77fe0cfacf2a3450069ae70926",
-      "Requirements": [
-        "lattice"
-      ]
     }
   }
 }

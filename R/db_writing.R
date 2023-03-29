@@ -33,7 +33,7 @@ insert_new_table_structures <- function(meta, con) {
 
   SURSfetchR::sql_function_call(con,
                                 "insert_new_dimension_levels",
-                                as.list(purrr::pmap(meta, prepare_dimension_levels_table, con) %>% purrr::list_rbind()))
+                                as.list(purrr::pmap(meta, MFfetchR::prepare_dimension_levels_table, con) %>% purrr::list_rbind()))
 
   SURSfetchR::sql_function_call(con,
                                 "insert_new_unit",
@@ -45,7 +45,7 @@ insert_new_table_structures <- function(meta, con) {
 
   SURSfetchR::sql_function_call(con,
                                 "insert_new_series_levels",
-                                unname(as.list(purrr::map(meta$table_name, prepare_series_levels_table, con) %>% purrr::list_rbind())))
+                                unname(as.list(purrr::map(meta$table_name, MFfetchR::prepare_series_levels_table, con) %>% purrr::list_rbind())))
 }
 
 

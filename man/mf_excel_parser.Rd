@@ -26,7 +26,7 @@ missing codes, transposing and renaming the columns.
 }
 \details{
 Hardcoded failure points:
-* there is a single duplicated row, if more turn up, the funciton will fail
+* there is a single duplicated row, if more turn up, the function will fail
 * the first row of the header is 8 rows above the first data row. If that
 chages or the code of the first data row changes, this will fail.
 * one of the tables has a six-month column instead of months and years. It

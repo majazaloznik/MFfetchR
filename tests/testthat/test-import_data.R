@@ -14,6 +14,6 @@ dittodb::with_mock_db({
     expect_equal(names(kbjf), c("monthly_vintages", "annual_vintages", "parsed_data"))
     parsed <- readRDS(test_path("testdata", "parsed.rds"))
     out <- prepare_data_table(parsed, con)
-    expect_equal(dim(out), c(200,3))
+    expect_equal(dim(out), c(200,4))
   })
 })

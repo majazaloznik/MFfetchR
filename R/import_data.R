@@ -115,7 +115,6 @@ prepare_data_table <- function(parsed_data, con){
 
   parsed_data$monthly %>%
     dplyr::left_join(vintage_lookup) %>%
-    dplyr::select(-code) %>%
     dplyr::bind_rows(
       parsed_data$annual %>%
         dplyr::left_join(vintage_lookup) %>%
