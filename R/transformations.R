@@ -76,6 +76,34 @@ transform_series_eo <- function(raw_data_frame){
 }
 
 
+#' Transform series needed for the 12month cumulative tables
+#'
+#' From the raw_data_frame output of load_series_as_df using kbjf_series_list_12mK as
+#' the series list, this function calculates the necessary series and transforms
+#' the values into millions.
+#'
+#' @param raw_data_frame dataframe with series from the kbjf_series_list_12mK list
+#'
+#' @return dataframe with some additional series calculated
+#' @export
+#'
+transform_series_12mK <- function(raw_data_frame){
+  raw_data_frame %>%
+    dplyr::mutate(`MF_UMAR--KBJF--093--400--M` = `MF--KBJF--093--911--M` +  `MF--KBJF--096--912--M`,
+                  `MF_UMAR--KBJF--103--400--M` = `MF--KBJF--103--403--M` + `MF--KBJF--110--404--M`,
+                  `MF_UMAR--KBJF--133--400--M` = `MF--KBJF--134--412--M` +`MF--KBJF--136--413--M`,) %>%
+    dplyr::select(-c(`MF--KBJF--093--911--M`, `MF--KBJF--096--912--M`,
+                     `MF--KBJF--103--403--M`, `MF--KBJF--110--404--M`,
+                     `MF--KBJF--134--412--M`, `MF--KBJF--136--413--M`)) %>%
+    dplyr::mutate(year = as.numeric(substr(period_id, 1,4)),
+                  month = substr(period_id, 6,7),
+                  date = lubridate::ym(period_id)) %>%
+    dplyr::relocate(period_id, year, month, date) %>%
+    dplyr::relocate(`MF_UMAR--KBJF--093--400--M`, .after = `MF--KBJF--092--40--M`) %>%
+    dplyr::relocate(`MF_UMAR--KBJF--103--400--M`, .after = `MF--KBJF--100--913--M`) %>%
+    dplyr::relocate(`MF_UMAR--KBJF--133--400--M`, .after = `MF--KBJF--124--411--M`) %>%
+    dplyr::mutate(dplyr::across(-c(1:4), ~ .x/1000000))
+}
 
 #' Calculate and prepare the table for quarterly data for EO
 #'
@@ -140,7 +168,7 @@ prepare_quarterly_eo <- function(data_frame) {
 #' for each account and formats the table appropriately. It also prepares the
 #' two header rows required for a pretty (but def not tidy) Excel presentation.
 #'
-#' @param data_frame output from transform_series_eo
+#' @param data_frame output from  \link[MFfetchR]{transform_series_eo}
 #'
 #' @return list of three objects, the main table and two header rows.
 #' @export
@@ -229,3 +257,32 @@ prepare_annual_eo <- function(data_frame) {
   mget(c("annual", "header_year_annual_df", "header_indicator_annual_df"))
 }
 
+#' Prepare data for the 12 month cumulative table
+#'
+#' This function calculates the 12 month cumulative sums and the preps the
+#' table and headers for exporting into excel
+#'
+#' @param data_frame output from  \link[MFfetchR]{transform_series_12mK}
+#'
+#' @return list of four tables: the first with the monthly data, the other three
+#' are headers for the fancy excel three-row heaedr
+#' @export
+prepare_monthly_12mK <- function(data_frame){
+  monthly <- data_frame %>%
+    dplyr::mutate(dplyr::across(dplyr::matches(".*--M$"), ~ zoo::rollapplyr(
+      .x, width = 12, FUN = sum, fill = NA, partial = FALSE))) %>%
+    dplyr::select(-c(year, month, date)) %>%
+    tidyr::pivot_longer(!c(period_id)) %>%
+    tidyr::pivot_wider(names_from = period_id, values_from = value) %>%
+    dplyr::mutate(kazalnik = kbjf_row_names_12Mk) %>%
+    dplyr::rename(koda = name) %>%
+    dplyr::relocate(kazalnik)
+  header_year_df <- data.frame(matrix(ncol = 2+length(data_frame$year), nrow = 0))
+  colnames(header_year_df) <- c("", "", data_frame$year)
+  header_month_df <- data.frame(matrix(ncol = 2+length(data_frame$year), nrow = 0))
+  colnames(header_month_df) <- c("", "", data_frame$month)
+  header_date_df <- data.frame(matrix(ncol = 2+length(data_frame$year), nrow = 0))
+  colnames(header_date_df) <- c("Kazalnik", "Koda", format(data_frame$date, format = "%b %Y"))
+  # return list
+  mget(c("monthly", "header_year_df", "header_month_df", "header_date_df"))
+}

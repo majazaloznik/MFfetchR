@@ -124,10 +124,10 @@ write_excel_kbjf_eo <- function(quarterly_list, annual_list, data_frame, outfile
 
   # create excel.
   wb <- openxlsx::createWorkbook()
-  all_sheets <- c("\\u010detrtletni", "letni","originalni")
+  all_sheets <- c("\u010detrtletni", "letni","originalni")
   purrr::walk(all_sheets, ~ openxlsx::addWorksheet(wb, .x))
 
-  main_sheets <- list("\\u010detrtletni", "letni")
+  main_sheets <- list("\u010detrtletni", "letni")
   main_list <- list(quarterly_list, annual_list)
 
   # write data and headers
@@ -174,9 +174,147 @@ write_excel_kbjf_eo <- function(quarterly_list, annual_list, data_frame, outfile
                ~ openxlsx::addStyle(wb, sheet = .x, center_wrap_style, cols = 1:ncol(.y[[1]]),
                                     rows = 1:2, gridExpand = TRUE, stack = TRUE))
   # freeze
-  purrr::walk(main_sheets, ~ openxlsx::freezePane(wb, .x, firstActiveRow = 2))
-  purrr::walk(main_sheets, ~ openxlsx::freezePane(wb, .x,  firstActiveCol = 3))
+  purrr::walk(main_sheets, ~ openxlsx::freezePane(wb, .x, firstActiveRow = 3, firstActiveCol = 3))
+  openxlsx::freezePane(wb, "originalni", firstActiveRow = 2, firstActiveCol =6)
+  purrr::walk(all_sheets, ~openxlsx::protectWorksheet(wb, sheet = .x, password = "umar",
+                                                       lockObjects = FALSE,
+                                                       lockScenarios = FALSE,
+                                                       lockFormattingRows = FALSE,
+                                                       lockFormattingCells = FALSE,
+                                                       lockFormattingColumns = FALSE))
 
   openxlsx::saveWorkbook(wb, file = outfile, overwrite = TRUE)
 }
+
+
+
+
+#' Write 12mK to Excel
+#'
+#' Writes and formats the in a suitable format. Potentially lets you extend
+#' a plot.
+#'
+#' @param monthly_list list output of \link[MFfetchR]{prepare_monthly_12mK}
+#' @param data_frame list output of \link[MFfetchR]{transform_series_eo}
+#' @param outfile path of file to create
+#' @param update logical whether file exists and should be loaded first and then
+#' updated.
+#'
+#' @return nothing, creates excel file
+#' @export
+write_excel_kbjf_12mK <- function(monthly_list, data_frame, outfile, update = TRUE){
+  # unpack data
+  list2env(monthly_list, envir = environment())
+
+  all_sheets <- c("12-mese\u010dne kumulative","originalni")
+  main_sheets <- list("12-mese\u010dne kumulative")
+  main_list <- list(monthly_list)
+  # create excel or load existing
+  if (update) {
+    wb <- loadWorkbook(outfile)
+    purrr::walk2(main_sheets, main_list,
+                 ~ openxlsx::removeCellMerge(wb, .x,cols = 1:ncol( .y[[1]]), rows = 1))
+                     } else {
+      wb <- openxlsx::createWorkbook()
+      purrr::walk(all_sheets, ~ openxlsx::addWorksheet(wb, .x))}
+
+  main_sheets <- list("12-mese\u010dne kumulative")
+  main_list <- list(monthly_list)
+
+  # write data and headers
+  purrr::walk2(main_sheets, main_list,
+               ~ openxlsx::writeData(wb, .x, .y[[1]], startRow = 3, startCol = 1))
+  purrr::walk2(main_sheets, main_list,
+               ~ openxlsx::writeData(wb, .x, .y[[2]], startRow = 1, startCol = 1))
+  purrr::walk2(main_sheets, main_list,
+               ~ openxlsx::writeData(wb, .x, .y[[3]], startRow = 2, startCol = 1))
+  purrr::walk2(main_sheets, main_list,
+               ~ openxlsx::writeData(wb, .x, .y[[4]], startRow = 3, startCol = 1))
+  openxlsx::writeData(wb, "originalni", data_frame, startRow = 1, startCol = 1)
+
+  # create named regions
+  purrr::walk2(main_sheets, main_list,
+               ~ openxlsx::createNamedRegion(wb, .x, cols = c(3:ncol(.y[[1]])),
+                                             rows = 4, name = "prihodki",
+                                             overwrite = TRUE))
+  purrr::walk2(main_sheets, main_list,
+               ~ openxlsx::createNamedRegion(wb, .x, cols = c(3:ncol(.y[[1]])),
+                                             rows = 19, name = "odhodki",
+                                             overwrite = TRUE))
+  purrr::walk2(main_sheets, main_list,
+               ~ openxlsx::createNamedRegion(wb, .x, cols = c(3:ncol(.y[[1]])),
+                                             rows = 33, name = "saldo",
+                                             overwrite = TRUE))
+  purrr::walk2(main_sheets, main_list,
+               ~ openxlsx::createNamedRegion(wb, .x, cols = c(3:ncol(.y[[1]])),
+                                             rows = 34, name = "primarni_saldo",
+                                             overwrite = TRUE))
+  purrr::walk2(main_sheets, main_list,
+               ~ openxlsx::createNamedRegion(wb, .x, cols = c(3:ncol(.y[[1]])),
+                                             rows = 3, name = "meseci",
+                                             overwrite = TRUE))
+  # merge header cells :)
+  purrr::walk2(main_sheets, main_list, function(sheet, cols){
+    for (i in seq_along(1:(ceiling((ncol(cols[[2]])-2)/12)))) {
+      openxlsx::mergeCells(wb, sheet, cols = 2+(12 * (i - 1) + 1):(12 * i), rows = 1)
+    }
+  })
+  # set column widths
+  purrr::walk(main_sheets, ~ openxlsx::setColWidths(wb, .x, cols = 1, widths = 45))
+  purrr::walk(main_sheets, ~ openxlsx::setColWidths(wb, .x, cols = 2, widths = 28))
+  purrr::walk2(main_sheets, main_list,
+               ~ openxlsx::setColWidths(wb, .x,
+                                        cols = (ncol(.y[[1]])-5):ncol(.y[[1]]), widths = 10))
+  # hide columns
+  n <- c(6)
+  purrr::pwalk(list(x = main_sheets, y = main_list, z = n), function(x,y,z){
+    openxlsx::setColWidths(wb, x, cols = 3:(ncol(y[[1]])-z),
+                           widths = 10, hidden = rep(TRUE, length(3:(ncol(y[[1]])-z))))})
+  # numeric format
+  style_num = openxlsx::createStyle(numFmt="0.00")
+  purrr::walk2(main_sheets, main_list,
+               ~ openxlsx::addStyle(wb, sheet = .x, style_num, cols = 3:ncol(.y[[1]]),
+                                    rows = 1:33, gridExpand = TRUE, stack = TRUE))
+  # bolding
+  style_bold = openxlsx::createStyle(textDecoration ="bold")
+  purrr::walk2(main_sheets, main_list,
+               ~ openxlsx::addStyle(wb, sheet = .x, style_bold, cols = 1:ncol(.y[[1]]),
+                                    rows = 1:3,gridExpand = TRUE, stack = TRUE))
+  # font
+  style_font = openxlsx::createStyle(fontName = "Calibri")
+  purrr::walk2(main_sheets, main_list,
+               ~ openxlsx::addStyle(wb, sheet = .x, style_font, cols = 1:ncol(.y[[1]]),
+                                    rows = 1:33,gridExpand = TRUE, stack = TRUE))
+  purrr::walk2(list("originalni"), list(data_frame),
+              ~ openxlsx::addStyle(wb, sheet = .x, style_font, cols = 1:ncol(.y),
+                                   rows = 1:nrow(.y),gridExpand = TRUE, stack = TRUE))
+  # highlight
+  style_yello <- createStyle( fgFill = "#fdf113", bgFill = "#fdf113")
+
+  style_lilac <- createStyle( fgFill = "#e38dfc", bgFill = "#e38dfc")
+  purrr::walk2(main_sheets, main_list,
+               ~ openxlsx::addStyle(wb, sheet = .x, style_yello, cols = 1:ncol(.y[[1]]),
+                                    rows = c(4, 19, 34),  gridExpand = TRUE, stack = TRUE))
+  purrr::walk2(main_sheets, main_list,
+              ~ openxlsx::addStyle(wb, sheet = .x, style_lilac, cols = 1:ncol(.y[[1]]),
+                                   rows = c(33),  gridExpand = TRUE, stack = TRUE))
+
+  # wrap and center
+  center_wrap_style <- openxlsx::createStyle(halign = "center", valign = "center",  wrapText = TRUE)
+  purrr::walk2(main_sheets, main_list,
+               ~ openxlsx::addStyle(wb, sheet = .x, center_wrap_style, cols = 1:ncol(.y[[1]]),
+                                    rows = 1:3, gridExpand = TRUE, stack = TRUE))
+  # freeze
+  purrr::walk(main_sheets, ~ openxlsx::freezePane(wb, .x, firstActiveRow = 4, firstActiveCol = 3))
+  openxlsx::freezePane(wb, "originalni", firstActiveRow = 2, firstActiveCol =5)
+
+  purrr::walk(all_sheets, ~openxlsx::protectWorksheet(wb, sheet = .x, password = "umar",
+                                                       lockObjects = FALSE,
+                                                       lockScenarios = FALSE,
+                                                       lockFormattingRows = FALSE,
+                                                       lockFormattingCells = FALSE,
+                                                       lockFormattingColumns = FALSE))
+  openxlsx::saveWorkbook(wb, file = outfile, overwrite = TRUE)
+}
+
 

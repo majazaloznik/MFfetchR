@@ -7,7 +7,7 @@
 prepare_annual_eo(data_frame)
 }
 \arguments{
-\item{data_frame}{output from transform_series_eo}
+\item{data_frame}{output from  \link[MFfetchR]{transform_series_eo}}
 }
 \value{
 list of three objects, the main table and two header rows.
