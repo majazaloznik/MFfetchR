@@ -42,8 +42,9 @@ prepare_vintage_table <- function(file_path, table_name, sheet_name, con){
         dplyr::slice_max(period_id) %>%
         dplyr::pull(period_id)
       if(identical(max_year, new_year)) {
-        stop(paste0("These vintages for table ", table_name,
-                    "are not new, they will not be inserted again."))
+        warning(paste0("These annual vintages for table ", table_name,
+                    " are not new, they will not be inserted again."))
+        annual_vintages <- NULL
       } else {
         annual_vintages <- vintage_table("A", tbl_id, con)}
     }
@@ -56,8 +57,8 @@ prepare_vintage_table <- function(file_path, table_name, sheet_name, con){
         dplyr::slice_max(period_id) %>%
         dplyr::pull(period_id)
       if(identical(max_month, new_month)) {
-        stop(paste0("These vintages for table ", table_name,
-                    "are not new, they will not be inserted again."))
+        stop(paste0("These monthly vintages for table ", table_name,
+                    " are not new, they will not be inserted again."))
       } else {
         monthly_vintages <- vintage_table("M", tbl_id, con)
       }

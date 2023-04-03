@@ -187,8 +187,6 @@ write_excel_kbjf_eo <- function(quarterly_list, annual_list, data_frame, outfile
 }
 
 
-
-
 #' Write 12mK to Excel
 #'
 #' Writes and formats the in a suitable format. Potentially lets you extend
@@ -211,7 +209,7 @@ write_excel_kbjf_12mK <- function(monthly_list, data_frame, outfile, update = TR
   main_list <- list(monthly_list)
   # create excel or load existing
   if (update) {
-    wb <- loadWorkbook(outfile)
+    wb <- openxlsx::loadWorkbook(outfile)
     purrr::walk2(main_sheets, main_list,
                  ~ openxlsx::removeCellMerge(wb, .x,cols = 1:ncol( .y[[1]]), rows = 1))
                      } else {
@@ -289,9 +287,9 @@ write_excel_kbjf_12mK <- function(monthly_list, data_frame, outfile, update = TR
               ~ openxlsx::addStyle(wb, sheet = .x, style_font, cols = 1:ncol(.y),
                                    rows = 1:nrow(.y),gridExpand = TRUE, stack = TRUE))
   # highlight
-  style_yello <- createStyle( fgFill = "#fdf113", bgFill = "#fdf113")
+  style_yello <- openxlsx::createStyle( fgFill = "#fdf113", bgFill = "#fdf113")
 
-  style_lilac <- createStyle( fgFill = "#e38dfc", bgFill = "#e38dfc")
+  style_lilac <- openxlsx::createStyle( fgFill = "#e38dfc", bgFill = "#e38dfc")
   purrr::walk2(main_sheets, main_list,
                ~ openxlsx::addStyle(wb, sheet = .x, style_yello, cols = 1:ncol(.y[[1]]),
                                     rows = c(4, 19, 34),  gridExpand = TRUE, stack = TRUE))
@@ -314,6 +312,110 @@ write_excel_kbjf_12mK <- function(monthly_list, data_frame, outfile, update = TR
                                                        lockFormattingRows = FALSE,
                                                        lockFormattingCells = FALSE,
                                                        lockFormattingColumns = FALSE))
+  openxlsx::saveWorkbook(wb, file = outfile, overwrite = TRUE)
+}
+
+
+
+#' Write stats appendix to Excel
+#'
+#' Writes and formats the in a suitable format.
+#'
+#' @param stats_appendix_list list output of \link[MFfetchR]{prepare_stats_appendix}
+#' @param data_frame list output of \link[MFfetchR]{transform_series_12mK}
+#' @param outfile path of file to create
+#'
+#' @return nothing, creates excel file
+#' @export
+write_excel_stats_appendix <- function(stats_appendix_list, data_frame, outfile){
+  # unpack data
+  list2env(stats_appendix_list, envir = environment())
+
+  all_sheets <- c("statisti\u010dna priloga","originalni")
+  main_sheets <- list("statisti\u010dna priloga")
+  main_list <- list(stats_appendix_list)
+  # create excel
+  wb <- openxlsx::createWorkbook()
+  purrr::walk(all_sheets, ~ openxlsx::addWorksheet(wb, .x))
+
+  # write data and headers
+  purrr::walk2(main_sheets, main_list,
+               ~ openxlsx::writeData(wb, .x, .y[[1]], startRow = 2, startCol = 1))
+  purrr::walk2(main_sheets, main_list,
+               ~ openxlsx::writeData(wb, .x, .y[[2]], startRow = 1, startCol = 1))
+  purrr::walk2(main_sheets, main_list,
+               ~ openxlsx::writeData(wb, .x, .y[[3]], startRow = 2, startCol = 1))
+  openxlsx::writeData(wb, "originalni", data_frame, startRow = 1, startCol = 1)
+
+
+  merged_indices <- rle(colnames(stats_appendix_list[[2]])[-c(1,2)]) %>%
+    with(data.frame(values, lengths)) %>%
+    dplyr::mutate(start = 2 + cumsum(lengths) - lengths + 1,
+           end = 2 + cumsum(lengths)) %>%
+    dplyr:: select(start, end)
+
+  # merge header cells :)
+  purrr::walk2(main_sheets, main_list, function(sheet, cols){
+    for (i in 4:nrow(merged_indices)) {
+      openxlsx::mergeCells(wb, sheet, cols = merged_indices[i,1]:merged_indices[i,2],
+                           rows = 1)
+    }
+  })
+  openxlsx::mergeCells(wb, "statisti\u010dna priloga", cols = 3, rows = 1:2)
+  openxlsx::mergeCells(wb, "statisti\u010dna priloga", cols = 4, rows = 1:2)
+  openxlsx::mergeCells(wb, "statisti\u010dna priloga", cols = 5, rows = 1:2)
+
+  # set column widths
+  purrr::walk(main_sheets, ~ openxlsx::setColWidths(wb, .x, cols = 1, widths = 45))
+  purrr::walk(main_sheets, ~ openxlsx::setColWidths(wb, .x, cols = 2, widths = 28))
+  purrr::walk2(main_sheets, main_list,
+               ~ openxlsx::setColWidths(wb, .x,
+                                        cols = 3:ncol(.y[[1]]), widths = 10))
+
+    # numeric format
+  style_num = openxlsx::createStyle(numFmt="0.00")
+  purrr::walk2(main_sheets, main_list,
+               ~ openxlsx::addStyle(wb, sheet = .x, style_num, cols = 3:ncol(.y[[1]]),
+                                    rows = 1:33, gridExpand = TRUE, stack = TRUE))
+  # bolding
+  style_bold = openxlsx::createStyle(textDecoration ="bold")
+  purrr::walk2(main_sheets, main_list,
+               ~ openxlsx::addStyle(wb, sheet = .x, style_bold, cols = 1:ncol(.y[[1]]),
+                                    rows = 1:2,gridExpand = TRUE, stack = TRUE))
+  # font
+  style_font = openxlsx::createStyle(fontName = "Calibri")
+  purrr::walk2(main_sheets, main_list,
+               ~ openxlsx::addStyle(wb, sheet = .x, style_font, cols = 1:ncol(.y[[1]]),
+                                    rows = 1:33,gridExpand = TRUE, stack = TRUE))
+  purrr::walk2(list("originalni"), list(data_frame),
+               ~ openxlsx::addStyle(wb, sheet = .x, style_font, cols = 1:ncol(.y),
+                                    rows = 1:nrow(.y),gridExpand = TRUE, stack = TRUE))
+  # highlight
+  style_yello <- openxlsx::createStyle( fgFill = "#fdf113", bgFill = "#fdf113")
+
+  style_lilac <- openxlsx::createStyle( fgFill = "#e38dfc", bgFill = "#e38dfc")
+  purrr::walk2(main_sheets, main_list,
+               ~ openxlsx::addStyle(wb, sheet = .x, style_yello, cols = 1:ncol(.y[[1]]),
+                                    rows = c(3, 18, 33),  gridExpand = TRUE, stack = TRUE))
+  purrr::walk2(main_sheets, main_list,
+               ~ openxlsx::addStyle(wb, sheet = .x, style_lilac, cols = 1:ncol(.y[[1]]),
+                                    rows = c(32),  gridExpand = TRUE, stack = TRUE))
+
+  # wrap and center
+  center_wrap_style <- openxlsx::createStyle(halign = "center", valign = "center",  wrapText = TRUE)
+  purrr::walk2(main_sheets, main_list,
+               ~ openxlsx::addStyle(wb, sheet = .x, center_wrap_style, cols = 1:ncol(.y[[1]]),
+                                    rows = 1:3, gridExpand = TRUE, stack = TRUE))
+  # freeze
+  purrr::walk(main_sheets, ~ openxlsx::freezePane(wb, .x, firstActiveRow = 3, firstActiveCol = 3))
+  openxlsx::freezePane(wb, "originalni", firstActiveRow = 2, firstActiveCol =5)
+
+  purrr::walk(all_sheets, ~openxlsx::protectWorksheet(wb, sheet = .x, password = "umar",
+                                                      lockObjects = FALSE,
+                                                      lockScenarios = FALSE,
+                                                      lockFormattingRows = FALSE,
+                                                      lockFormattingCells = FALSE,
+                                                      lockFormattingColumns = FALSE))
   openxlsx::saveWorkbook(wb, file = outfile, overwrite = TRUE)
 }
 

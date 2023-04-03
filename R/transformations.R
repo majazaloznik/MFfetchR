@@ -25,10 +25,10 @@ rename_value_column <- function(series_name, df) {
 load_series_as_df <- function(series_list, con) {
   vintage_list <- purrr::map(series_list, UMARaccessR::get_vintage_from_series_code, con)
   vintage_list <- purrr::map(vintage_list, `[[`, 1)
-  data_list <- purrr::map(vintage_list, get_data_points_from_vintage, con)
+  data_list <- purrr::map(vintage_list, UMARaccessR::get_data_points_from_vintage, con)
   data_list_final <- purrr::map2(series_list, data_list, rename_value_column)
   data_frame <- Reduce(function(...) merge(..., all=T), data_list_final)
-  data_frame <- data_frame %>% select(period_id, sort(colnames(data_frame)[-1]))
+  data_frame <- data_frame %>% dplyr::select(period_id, sort(colnames(data_frame)[-1]))
   data_frame
 }
 
@@ -274,7 +274,7 @@ prepare_monthly_12mK <- function(data_frame){
     dplyr::select(-c(year, month, date)) %>%
     tidyr::pivot_longer(!c(period_id)) %>%
     tidyr::pivot_wider(names_from = period_id, values_from = value) %>%
-    dplyr::mutate(kazalnik = kbjf_row_names_12Mk) %>%
+    dplyr::mutate(kazalnik = kbjf_row_names_12mK) %>%
     dplyr::rename(koda = name) %>%
     dplyr::relocate(kazalnik)
   header_year_df <- data.frame(matrix(ncol = 2+length(data_frame$year), nrow = 0))
@@ -285,4 +285,75 @@ prepare_monthly_12mK <- function(data_frame){
   colnames(header_date_df) <- c("Kazalnik", "Koda", format(data_frame$date, format = "%b %Y"))
   # return list
   mget(c("monthly", "header_year_df", "header_month_df", "header_date_df"))
+}
+
+
+#' Prepare data for the stats appendix table
+#'
+#' This function prepares the aggregates for the stats appendix in EO. This
+#' means the last three complete years, the last 12 complete quaters and last
+#' 24 complete months.
+#'
+#' @param data_frame output from  \link[MFfetchR]{transform_series_12mK}
+#'
+#' @return list of four tables: the first with the monthly data, the other three
+#' are headers for the fancy excel three-row heaedr
+#' @export
+prepare_stats_appendix <- function(data_frame){
+  annual <- data_frame %>%
+    dplyr::group_by(year) %>%
+    dplyr::mutate(no_months = dplyr::n()) %>%
+    dplyr::filter(no_months == 12) %>%
+    dplyr::ungroup() %>%
+    dplyr::filter(dplyr::dense_rank(dplyr::desc(year)) <= 3) %>%
+    dplyr::arrange(year) %>%
+    dplyr::group_by(year) %>%
+    dplyr::summarise(dplyr::across(dplyr::where(is.numeric),~ sum(.x, na.rm = TRUE))) %>%
+    dplyr::select( -no_months ) %>%
+    tidyr::pivot_longer(!c(year)) %>%
+    tidyr::pivot_wider(names_from = year, values_from = value) %>%
+    dplyr::mutate(kazalnik = MFfetchR:::kbjf_row_names_12mK) %>%
+    dplyr::rename(koda = name) %>%
+    dplyr::relocate(kazalnik)
+
+  quarterly <- data_frame %>%
+    dplyr::mutate(quarter = paste0(year,"Q",lubridate::quarter(date))) %>%
+    dplyr::group_by(quarter) %>%
+    dplyr::mutate(no_months = dplyr::n()) %>%
+    dplyr::filter(no_months == 3) %>%
+    dplyr::ungroup() %>%
+    dplyr::relocate(quarter) %>%
+    dplyr::filter(dplyr::dense_rank(dplyr::desc(quarter)) <= 12) %>%
+    dplyr::arrange(quarter) %>%
+    dplyr::group_by(quarter) %>%
+    dplyr::summarise(dplyr::across(dplyr::where(is.numeric),~ sum(.x, na.rm = TRUE))) %>%
+    dplyr::select( -no_months, -year) %>%
+    tidyr::pivot_longer(!c(quarter)) %>%
+    tidyr::pivot_wider(names_from = quarter, values_from = value) %>%
+    dplyr::mutate(kazalnik = MFfetchR:::kbjf_row_names_12mK) %>%
+    dplyr::rename(koda = name) %>%
+    dplyr::relocate(kazalnik)
+
+  monthly <- data_frame %>%
+    dplyr::slice_max(period_id, n = 24) %>%
+    dplyr::arrange(period_id) %>%
+    dplyr::select( -month, -year, -date) %>%
+    tidyr::pivot_longer(!c(period_id)) %>%
+    tidyr::pivot_wider(names_from = period_id, values_from = value) %>%
+    dplyr::mutate(kazalnik = MFfetchR:::kbjf_row_names_12mK) %>%
+    dplyr::rename(koda = name) %>%
+    dplyr::relocate(kazalnik)
+
+  stats_appendix <- dplyr::left_join(dplyr::left_join(annual, quarterly), monthly)
+  nmz<- colnames(stats_appendix)[-c(1:2)]
+  top <- c("", "", substr(nmz, 1, 4))
+  bottom <- c("Kazalnik", "Koda", substr(nmz, 5, nchar(nmz)))
+
+  header_top_df <- data.frame(matrix(ncol = length(top), nrow = 0))
+  colnames(header_top_df) <- top
+  header_bottom_df <- data.frame(matrix(ncol = length(bottom), nrow = 0))
+  colnames(header_bottom_df) <- bottom
+
+  # return list
+  mget(c("stats_appendix", "header_top_df", "header_bottom_df"))
 }

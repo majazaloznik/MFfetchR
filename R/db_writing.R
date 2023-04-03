@@ -54,7 +54,8 @@ insert_new_table_structures <- function(meta, con) {
 #'
 #' When new data for a table (one of the Excel's) is added, these are new
 #' vintages. This function inserts a set of new vintages and their corresponding
-#' data points to the database.
+#' data points to the database. It is possible to only have new monthly not annual
+#' vintages.
 #'
 #' @param file_path path to excel file
 #' @param table_name name of table
@@ -75,9 +76,11 @@ insert_new_data <- function(file_path, table_name, sheet_name, con) {
   res[[1]] <- SURSfetchR::sql_function_call(con,
                                 "insert_new_vintage",
                                 as.list(l$monthly_vintages))
-  res[[2]] <- SURSfetchR::sql_function_call(con,
-                                            "insert_new_vintage",
-                                            as.list(l$annual_vintages))
+  if(!is.null(l$annual_vintages)){
+    res[[2]] <- SURSfetchR::sql_function_call(con,
+                                              "insert_new_vintage",
+                                              as.list(l$annual_vintages))
+  }
 
   insert_data_points(l[[3]], con)
 

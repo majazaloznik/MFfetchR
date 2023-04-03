@@ -1,13 +1,12 @@
 #' script for data that is saved into R/sysdata.rda
 
-meta <- data.frame(file_path = c("tests/testthat/testdata/Drzavni_proracun_1992-2023.xlsx",
-                                 "tests/testthat/testdata/Bilance_proracunov_obcin_1992-2023.xlsx",
-                                 "tests/testthat/testdata/Zavod_za_pokojninsko_in_invalidsko_zavarovanje_1992-2023.xlsx",
-                                 "tests/testthat/testdata/Zavod_za_zdravstveno_zavarovanje_Slovenije_1992-2023.xlsx",
-                                 "tests/testthat/testdata/Konsolidirana_bilanca_javnega_financiranja_1992-2023.xlsx"),
+meta <- data.frame(file_name_partial = c("Drzavni_proracun_1992",
+                                         "Bilance_proracunov_obcin_1992",
+                                         "Zavod_za_pokojninsko_in_invalidsko_zavarovanje_1992",
+                                         "Zavod_za_zdravstveno_zavarovanje_Slovenije_1992",
+                                         "Konsolidirana_bilanca_javnega_financiranja_1992"),
                    table_name = c("DP", "OB", "ZPIZ", "ZZZS", "KBJF"),
                    sheet_name = c("MESPROR", "OBCINE", "ZPIZ", "ZZZS", "GLOBALNA"))
-
 
 konto_codes <- data.frame(description =c("TEKO\u010cI PRIHODKI" ,
                                          "TEKOCI PRIHODKI",
@@ -126,7 +125,7 @@ kbjf_row_names_eo <-c("SKUPAJ PRIHODKI",
               "PRIMARNI SALDO")
 
 # name of final rows in 12 month cumulative tables.
-kbjf_row_names_12Mk <-c("SKUPAJ PRIHODKI",
+kbjf_row_names_12mK <-c("SKUPAJ PRIHODKI",
                       "TEKOČI PRIHODKI",
                       "DAVČNI PRIHODKI",
                       "DAVKI NA DOHODEK IN DOBIČEK",
@@ -163,4 +162,5 @@ usethis::use_data(meta,
                   kbjf_series_list_eo,
                   kbjf_series_list_12mK,
                   kbjf_row_names_eo,
+                  kbjf_row_names_12mK,
                   internal = TRUE, overwrite = TRUE)

@@ -21,7 +21,8 @@ list of tables with counts for each inserted row.
 \description{
 When new data for a table (one of the Excel's) is added, these are new
 vintages. This function inserts a set of new vintages and their corresponding
-data points to the database.
+data points to the database. It is possible to only have new monthly not annual
+vintages.
 }
 \examples{
 \dontrun{
