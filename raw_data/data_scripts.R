@@ -1,6 +1,6 @@
 #' script for data that is saved into R/sysdata.rda
 
-meta <- data.frame(file_name_partial = c("Drzavni_proracun_1992",
+meta <- data.frame(file_path = c("Drzavni_proracun_1992",
                                          "Bilance_proracunov_obcin_1992",
                                          "Zavod_za_pokojninsko_in_invalidsko_zavarovanje_1992",
                                          "Zavod_za_zdravstveno_zavarovanje_Slovenije_1992",
