@@ -16,8 +16,8 @@
 #' @param con connection to database
 #'
 #'
-#' @return a dataframe with the `series_id` and `published` columns
-#' for all the series in this table.
+#' @return list with a dataframe with the `series_id` and `published` columns
+#' for all monthly and annual series in this table. and the parsed data.
 #' @export
 #'
 

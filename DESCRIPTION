@@ -1,6 +1,6 @@
 Package: MFfetchR
 Type: Package
-Title: What the Package Does (Title Case)
+Title:  Parse, Transform & Import MF Data into the UMAR Database
 Version: 0.1.0
 Author: Maja Zaloznik
 Maintainer: Maja Zaloznik <maja.zaloznik@gmail.com>
