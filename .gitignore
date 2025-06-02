@@ -42,5 +42,6 @@ tests/testthat/testdata/*.xlsx
 
 # top level shite
 *.xlsx
-!tests/testthat/testdata/zadnje_stare/Drzavni_proracun_1992_2025.xlsx
+!tests/testthat/testdata/zadnje_stare/Drzavni_proracun_1992-2025.xlsx
+!tests/testthat/testdata/zadnje_stare/Bilance_proracunov_obcin_1992-2025.xlsx
 !tests/testthat/testdata/zadnje_stare/Konsolidirana_bilanca_javnega_financiranja_1992-2025.xlsx
