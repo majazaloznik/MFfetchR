@@ -1,7 +1,7 @@
 test_that("preparing vintages and data", {
   dittodb::with_mock_db({
     con_test <- make_test_connection()
-    df <- prepare_vintage_table(testthat::test_path("../../tests/testthat/testdata/zadnje_stare/Drzavni_proracun_1992-2025.xlsx"),
+    df <- prepare_vintage_table(testthat::test_path("testdata/zadnje_stare/Drzavni_proracun_1992-2025.xlsx"),
                                 "DP", "MESPROR", con_test, "platform")
     expect_equal(dim(df$monthly_vintages), c(1574,2))
     expect_equal(dim(df$annual_vintages), c(1574,2))
