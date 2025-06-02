@@ -59,12 +59,12 @@ mf_excel_parser <- function(file_path, table_name, sheet_name){
 
   # add missing konto codes and clean up
   suppressWarnings(data_clean %>%
-    dplyr::mutate(across(c(5:ncol(data_clean)), as.numeric)) %>%
-    dplyr::rowwise() %>%
-    dplyr::mutate(code = ifelse(!is.na(match(description, konto_codes$description)) & is.na(code),
-                                 konto_codes$code[match(description, konto_codes$description)], code)) %>%
-      dplyr::ungroup() %>%
-    dplyr::select(-delete, -description_eng) -> data_clean)
+                     dplyr::mutate(across(c(5:ncol(data_clean)), as.numeric)) %>%
+                     dplyr::rowwise() %>%
+                     dplyr::mutate(code = ifelse(!is.na(match(description, konto_codes$description)) & is.na(code),
+                                                 konto_codes$code[match(description, konto_codes$description)], code)) %>%
+                     dplyr::ungroup() %>%
+                     dplyr::select(-delete, -description_eng) -> data_clean)
 
   # harcode: remove second konto code 7505 if it exists (zzzs), the one where
   # all the values are either zero or NA.
@@ -74,8 +74,8 @@ mf_excel_parser <- function(file_path, table_name, sheet_name){
   }
   data_clean <- data_clean %>%
     dplyr::mutate(order =  dplyr::row_number()) %>%
-  dplyr::mutate(code = paste0("MF--", table_name, "--",sprintf("%03d",as.integer(order)),
-                              "--", trim_leading(format(code, scientific = FALSE)))) %>%
+    dplyr::mutate(code = paste0("MF--", table_name, "--",
+                                trim_leading(format(code, scientific = FALSE)))) |>
     dplyr::relocate(order)
 
   series <- data_clean %>% dplyr::select(code, description)
@@ -177,11 +177,11 @@ write_excel_kbjf_eo <- function(quarterly_list, annual_list, data_frame, outfile
   purrr::walk(main_sheets, ~ openxlsx::freezePane(wb, .x, firstActiveRow = 3, firstActiveCol = 3))
   openxlsx::freezePane(wb, "originalni", firstActiveRow = 2, firstActiveCol =6)
   purrr::walk(all_sheets, ~openxlsx::protectWorksheet(wb, sheet = .x, password = "umar",
-                                                       lockObjects = FALSE,
-                                                       lockScenarios = FALSE,
-                                                       lockFormattingRows = FALSE,
-                                                       lockFormattingCells = FALSE,
-                                                       lockFormattingColumns = FALSE))
+                                                      lockObjects = FALSE,
+                                                      lockScenarios = FALSE,
+                                                      lockFormattingRows = FALSE,
+                                                      lockFormattingCells = FALSE,
+                                                      lockFormattingColumns = FALSE))
 
   openxlsx::saveWorkbook(wb, file = outfile, overwrite = TRUE)
 }
@@ -212,9 +212,9 @@ write_excel_kbjf_12mK <- function(monthly_list, data_frame, outfile, update = TR
     wb <- openxlsx::loadWorkbook(outfile)
     purrr::walk2(main_sheets, main_list,
                  ~ openxlsx::removeCellMerge(wb, .x,cols = 1:ncol( .y[[1]]), rows = 1))
-                     } else {
-      wb <- openxlsx::createWorkbook()
-      purrr::walk(all_sheets, ~ openxlsx::addWorksheet(wb, .x))}
+  } else {
+    wb <- openxlsx::createWorkbook()
+    purrr::walk(all_sheets, ~ openxlsx::addWorksheet(wb, .x))}
 
   main_sheets <- list("12-mese\u010dne kumulative")
   main_list <- list(monthly_list)
@@ -284,8 +284,8 @@ write_excel_kbjf_12mK <- function(monthly_list, data_frame, outfile, update = TR
                ~ openxlsx::addStyle(wb, sheet = .x, style_font, cols = 1:ncol(.y[[1]]),
                                     rows = 1:33,gridExpand = TRUE, stack = TRUE))
   purrr::walk2(list("originalni"), list(data_frame),
-              ~ openxlsx::addStyle(wb, sheet = .x, style_font, cols = 1:ncol(.y),
-                                   rows = 1:nrow(.y),gridExpand = TRUE, stack = TRUE))
+               ~ openxlsx::addStyle(wb, sheet = .x, style_font, cols = 1:ncol(.y),
+                                    rows = 1:nrow(.y),gridExpand = TRUE, stack = TRUE))
   # highlight
   style_yello <- openxlsx::createStyle( fgFill = "#fdf113", bgFill = "#fdf113")
 
@@ -294,8 +294,8 @@ write_excel_kbjf_12mK <- function(monthly_list, data_frame, outfile, update = TR
                ~ openxlsx::addStyle(wb, sheet = .x, style_yello, cols = 1:ncol(.y[[1]]),
                                     rows = c(4, 19, 34),  gridExpand = TRUE, stack = TRUE))
   purrr::walk2(main_sheets, main_list,
-              ~ openxlsx::addStyle(wb, sheet = .x, style_lilac, cols = 1:ncol(.y[[1]]),
-                                   rows = c(33),  gridExpand = TRUE, stack = TRUE))
+               ~ openxlsx::addStyle(wb, sheet = .x, style_lilac, cols = 1:ncol(.y[[1]]),
+                                    rows = c(33),  gridExpand = TRUE, stack = TRUE))
 
   # wrap and center
   center_wrap_style <- openxlsx::createStyle(halign = "center", valign = "center",  wrapText = TRUE)
@@ -307,11 +307,11 @@ write_excel_kbjf_12mK <- function(monthly_list, data_frame, outfile, update = TR
   openxlsx::freezePane(wb, "originalni", firstActiveRow = 2, firstActiveCol =5)
 
   purrr::walk(all_sheets, ~openxlsx::protectWorksheet(wb, sheet = .x, password = "umar",
-                                                       lockObjects = FALSE,
-                                                       lockScenarios = FALSE,
-                                                       lockFormattingRows = FALSE,
-                                                       lockFormattingCells = FALSE,
-                                                       lockFormattingColumns = FALSE))
+                                                      lockObjects = FALSE,
+                                                      lockScenarios = FALSE,
+                                                      lockFormattingRows = FALSE,
+                                                      lockFormattingCells = FALSE,
+                                                      lockFormattingColumns = FALSE))
   openxlsx::saveWorkbook(wb, file = outfile, overwrite = TRUE)
 }
 
@@ -351,7 +351,7 @@ write_excel_stats_appendix <- function(stats_appendix_list, data_frame, outfile)
   merged_indices <- rle(colnames(stats_appendix_list[[2]])[-c(1,2)]) %>%
     with(data.frame(values, lengths)) %>%
     dplyr::mutate(start = 2 + cumsum(lengths) - lengths + 1,
-           end = 2 + cumsum(lengths)) %>%
+                  end = 2 + cumsum(lengths)) %>%
     dplyr:: select(start, end)
 
   # merge header cells :)
@@ -372,7 +372,7 @@ write_excel_stats_appendix <- function(stats_appendix_list, data_frame, outfile)
                ~ openxlsx::setColWidths(wb, .x,
                                         cols = 3:ncol(.y[[1]]), widths = 10))
 
-    # numeric format
+  # numeric format
   style_num = openxlsx::createStyle(numFmt="0.00")
   purrr::walk2(main_sheets, main_list,
                ~ openxlsx::addStyle(wb, sheet = .x, style_num, cols = 3:ncol(.y[[1]]),

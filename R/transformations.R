@@ -312,7 +312,7 @@ prepare_stats_appendix <- function(data_frame){
     dplyr::select( -no_months ) %>%
     tidyr::pivot_longer(!c(year)) %>%
     tidyr::pivot_wider(names_from = year, values_from = value) %>%
-    dplyr::mutate(kazalnik = MFfetchR:::kbjf_row_names_12mK) %>%
+    dplyr::mutate(kazalnik = kbjf_row_names_12mK) %>%
     dplyr::rename(koda = name) %>%
     dplyr::relocate(kazalnik)
 
@@ -330,7 +330,7 @@ prepare_stats_appendix <- function(data_frame){
     dplyr::select( -no_months, -year) %>%
     tidyr::pivot_longer(!c(quarter)) %>%
     tidyr::pivot_wider(names_from = quarter, values_from = value) %>%
-    dplyr::mutate(kazalnik = MFfetchR:::kbjf_row_names_12mK) %>%
+    dplyr::mutate(kazalnik = kbjf_row_names_12mK) %>%
     dplyr::rename(koda = name) %>%
     dplyr::relocate(kazalnik)
 
@@ -340,7 +340,7 @@ prepare_stats_appendix <- function(data_frame){
     dplyr::select( -month, -year, -date) %>%
     tidyr::pivot_longer(!c(period_id)) %>%
     tidyr::pivot_wider(names_from = period_id, values_from = value) %>%
-    dplyr::mutate(kazalnik = MFfetchR:::kbjf_row_names_12mK) %>%
+    dplyr::mutate(kazalnik = kbjf_row_names_12mK) %>%
     dplyr::rename(koda = name) %>%
     dplyr::relocate(kazalnik)
 

@@ -1,13 +1,13 @@
 Package: MFfetchR
 Type: Package
-Title:  Parse, Transform & Import MF Data into the UMAR Database
-Version: 0.1.0
+Title: Parse, Transform & Import MF Data into the UMAR Database
+Version: 0.2.0
 Author: Maja Zaloznik
 Maintainer: Maja Zaloznik <maja.zaloznik@gmail.com>
 Description: The goal of MFfetchR is to check for new MF data tables somewhere (a folder or email) import and parse the data, and prepare it for the UMAR data model.
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.2
 Suggests: 
     covr,
     dittodb,
@@ -21,6 +21,7 @@ Imports:
     RPostgres (>= 1.4.5),
     SURSfetchR,
     UMARaccessR,
+    UMARimportR,
     tidyr (>= 1.3.0),
     purrr (>= 1.0.1),
     lubridate (>= 1.9.1),
@@ -29,6 +30,7 @@ Imports:
 License: GPL (>= 3)
 Remotes: 
   majazaloznik/UMARaccessR,
-    majazaloznik/SURSfetchR
+    majazaloznik/SURSfetchR,
+    majazaloznik/UMARimportR,
 Depends: 
-    R (>= 2.10)
+    R (>= 3.5)

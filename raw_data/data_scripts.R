@@ -1,10 +1,10 @@
 #' script for data that is saved into R/sysdata.rda
 
-meta <- data.frame(file_path = c("Drzavni_proracun_1992",
-                                         "Bilance_proracunov_obcin_1992",
-                                         "Zavod_za_pokojninsko_in_invalidsko_zavarovanje_1992",
-                                         "Zavod_za_zdravstveno_zavarovanje_Slovenije_1992",
-                                         "Konsolidirana_bilanca_javnega_financiranja_1992"),
+meta <- data.frame(file_path = c("Drzavni_proracun",
+                                         "Bilance_proracunov_obcin",
+                                         "Zavod_za_pokojninsko_in_invalidsko_zavarovanje",
+                                         "Zavod_za_zdravstveno_zavarovanje_Slovenije",
+                                         "Konsolidirana_bilanca_javnega_financiranja"),
                    table_name = c("DP", "OB", "ZPIZ", "ZZZS", "KBJF"),
                    sheet_name = c("MESPROR", "OBCINE", "ZPIZ", "ZZZS", "GLOBALNA"))
 

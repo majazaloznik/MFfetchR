@@ -42,4 +42,4 @@ tests/testthat/testdata/*.xlsx
 
 # top level shite
 *.xlsx
-test*
+
