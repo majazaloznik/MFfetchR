@@ -151,5 +151,12 @@ MF_import_data_points_old(testthat::test_path("tests/testthat/testdata/zadnje_st
 stop_db_capturing()
 
 
-
+start_db_capturing()
+con_test <- make_test_connection()
+Sys.setenv("TESTTHAT"="true")
+resutls <- MF_import_structure_old("ZPIZ", con_test, schema = "platform",
+                                   keep_vintage = FALSE, "tests/testthat/testdata/zadnje_stare/")
+df <- prepare_vintage_table(testthat::test_path("tests/testthat/testdata/zadnje_stare/Zavod_za_pokojninsko_in_invalidsko_zavarovanje_1992-2025.xlsx"),
+                            "ZPIZ", "ZPIZ", con_test, "platform")
+stop_db_capturing()
 

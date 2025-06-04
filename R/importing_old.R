@@ -72,61 +72,6 @@ MF_import_structure_old <- function(table_name, con, schema = "platform",
 
 
 
-#' Insert data points from BS
-#'
-#' Function to prepare and insert BS data points. The function first prepares
-#' the required vintages and inserts them, then prepares the data points
-#' table and inserts it. The function returns the results invisibly.
-#'
-#' This is a BS specific function, which should be followed by the generic
-#' UMARimportR function to write the vintage hashes and clean up redundant
-#' vintages.
-#'
-#' @param data_path path to folder with
-#' @param table_name the table name (eg "DP")
-#' @param con Database connection
-#' @param schema Schema name
-#'
-#' @return Insertion results (invisibly)
-#' @export
-MF_import_data_points <- function(data_path, table_name, con, schema = "platform") {
-  message("Importing data points from: ", table_name, " into schema ", schema)
-  # collect outputs from the functions into one result list
-  result <- list()
-  # Try to prepare MF vintage table but catch any errors
-  file_path <- paste0(data_path, "/", meta |>
-                        dplyr::filter(table_name == !!table_name) |>
-                        dplyr::pull(file_path),
-                      "_1992-2025.xlsx")
-  sheet_name <- meta |>
-    dplyr::filter(table_name == !!table_name) |>
-    dplyr::pull(sheet_name)
-  vintage_result <- tryCatch(
-    expr = {list(
-      vintages = prepare_vintage_table(file_path, table_name, sheet_name, con, schema),
-      error = NULL)},
-    error = function(e) {
-      error_msg <- conditionMessage(e)
-      message("Note: ", error_msg)
-      return(list(
-        vintages = NULL,
-        error = error_msg))})
-  # Store error message if any
-  result$vintage_error <- vintage_result$error
-  # Only proceed with import if vintages were prepared successfully
-  if (!is.null(vintage_result$vintages)) {
-    # import vintages
-    result$vintages_m <- UMARimportR::insert_new_vintage(con, vintage_result$monthly_vintages, schema)
-    result$vintages_a <- UMARimportR::insert_new_vintage(con, vintage_result$annual_vintages, schema)
-    # Prepare data in SURS-specific way
-    prep_data <- prepare_mf_data_for_insert(vintage_resutl$parsed_data, con, schema)
-    # Insert the prepared data
-    result$data <- UMARimportR::insert_prepared_data_points(prep_data, con, schema)
-  } else {
-    message("Skipping import for ", table_name, " due to vintage preparation issue: ", vintage_result$error)
-  }
-  invisible(result)
-}
 
 
 #' Insert new data for a table i.e. a vintage

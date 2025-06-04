@@ -21,6 +21,12 @@ test_that("insert strucutre and data points", {
     expect_equal(length(results), 2)
     expect_equal(results[[1]], 271)
     expect_equal(results[[2]], 271)
+    df <- prepare_vintage_table(testthat::test_path("testdata/zadnje_stare/Zavod_za_pokojninsko_in_invalidsko_zavarovanje_1992-2025.xlsx"),
+                                "ZPIZ", "ZPIZ", con_test, "platform")
 
+    expect_equal(length(results), 2)
+    expect_equal(dim(df$monthly_vintages), c(190,2))
+    expect_equal(length(df$parsed_data), 3)
+    expect_equal(dim(df$parsed_data$monthly), c(62130,3))
   })
 })
