@@ -123,7 +123,8 @@ prepare_mf_data_for_insert <- function(parsed_data, con, schema = "platform"){
     dplyr::select(series_id, code, id, published) |>
     dplyr::collect() |>
     dplyr::group_by(series_id) |>
-    dplyr::slice_max(published)
+    dplyr::slice_max(published) |>
+    dplyr::filter(!is.na(published))
 
   parsed_data$monthly %>%
     dplyr::left_join(vintage_lookup) %>%

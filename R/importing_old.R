@@ -1,4 +1,4 @@
-#' Import structural metadata for a BS table
+#' Import structural metadata for a MF table
 #'
 #' Umbrella function that prepares and import all the metadata tables into
 #' the database. It uses the functions from the UMARimportR package to

@@ -1,0 +1,84 @@
+
+
+Nova struktura podatkov na powerBI
+
+## KBJF
+
+- K2 sekcija in 1 nivo konsolidacija imata oba 6 vrednosti, ki se ena na ena preslikajo.
+- razlika je, da ima K2 sekcija pri imenih kao dodane konte, ki jih vsebujejo.
+- samo ti konti niso uporabni, ker niso nujno prav. recimo V. ima napisano (440 + 441 + 442), čeprav je zraven tudi 443.
+
+- 2 nivo konsolidacije ima za konte 75, 44, 50 in 55 zamaknjene ravni in prikazuje v resnici 3 nivo. Za te iste konte je potem v 3 nivo konsolidacije že 4 nivo. In 4 nivo prazen. To so B in C bilance
+- 
+
+
+# DP 
+
+- tabela ima na vrhu filtre pred dejanso tabelo, medtem ko pri KBJF so filtri na koncu. 
+
+
+# new new format
+
+- v poslanih podatkih imajo ZZZS blagajna mesec 0. Sicer samo za leto 2024. Teorija je, da gre za letne podatke, čeprav se zanimivo se podatki po mesecih ne seštejejo vedno v to vsoto. Skratka vprašanje je kako je pri izvozu prišlo do te situacije. In mimogrede kaj pomenita RE in REM v TIP_ID in.
+
+- v trenutnem izvozu so za ene prazne konte podatki samo za določena leta, ne za vsa. recimo ZPIZ 403 manjka za 2024. 
+
+
+
+Pozdravljeni,
+
+Spodaj je še par komentarjev oz. vprašanj glede nove tabele, ki ste jo testno pripravili. 
+
+1. Za leta 2021, 2022 in 2023 imajo vse štiri blagajne razen DP večje število zapisov, kjer je vrednost K6_ID drugačna od vrednosti v stolpcu KONTO. Tudi, če je vaš odgovor, da naj stolpec KONTO ignoriramo, bi vseeno rada opozorila na primere, ko vrednost v tem stolpcu ni "nad-konto" vrednosti v stolpcu K6_ID. Ti primeri so v priponki na zavihku konto_check
+
+2. V stolpcu MESEC se za blagajno ZZZS za leto 2024 pojavlja vrednost 0. Če je odgovor, da gre za letne podatke, bi vseeno opozorila, da se v številnih primerih podatki ne seštejejo pravilno, kar nekaj kontov ima namreč tudi več milijonske razlike v primerjavi z vsoto po mesecih.  Ti primeri so v priponki na zavihku mesec_check. 
+
+3. V tabeli je tudi nekaj dupliciranih zapisov. Sicer je v vseh primerih duplikatov vrednost 0, vendar bi vseeno opozorila na to. Vedno gre za pare kjer je TIP_ID enkrat RE in drugič REM, samo ne vem kaj to pomeni. Ti primeri so v priponki na zavihku duplikati_check.
+
+Zgornji komentarji so samo informativne narave, saj se zavedam, da je tabela še v testni fazi.
+
+Za konec pa še prošnja: glede na to, da smo se dogovorili, da se bo redno tabelo pošiljalo samo za zadnji dve leti, ali se je možno dogovoriti, da na začetku dobimo tudi enkrat polno tabelo za vsa leta nazaj, ker je v novi tabeli precej kontov, ki jih po starem sistemu nismo spremljali. Tako bomo lahko tudi za te konte imeli popolne časovne serije. 
+
+Hvala 
+
+
+Nadaljenvanje
+
+v KBJF so ya 2022 in 2023 vrednosti za konto 740100 in 740400 zamenjane v primerjavi s prejšnjimi tabelami. Torej vrednosti, ki so bile prej objavljene kot 7404 so v novi tabeli pod 740100. (in obratno, čeprav obratno so ničle). 740100 je tudi ena od K6_ID vrednosti, ki ima pod konto zapisan 7404, torej vrednosti, ki ni nad-konto. Vprašanje je katera je pravilna vrednost in ali je to napaka v novi tabeli.
+
+
+Za leto 2024 in 2025 so v Excel tabeli za KBJF (torej v starih tabelah) za 413302 objavljeni napačni podatki in sicer so pod ta konto prišteti tudi podatki za 413303, 413304, 413305 in 413306. Pojavlja se pa vprašanje kje so bili ti konti pravilno upoštevani po nadkontih - ki jih zdaj ne bomo dobili in jih izračunamo sami. Če prav razumem 4133 ni upoštevan v 413? Medtem ko ste 413300, 413301, 413302 in 413310 v starih tabelah vštevali v 40 in seveda 4. Skratka prosili bi za razlago teh izjem pri izračunu višjih agregatov v konsolidirani bilanci. 
+
+V DP sta še dve razliki za teh zadnjih pet let:
+
+MF--DP--402945--M za 2023M03
+MF--DP--787000--M za 2023M08 
+
+
+
+
+Agregiranje kontov v konsolidirani bilanci
+
+Sonja je poslala šifrant kontov za konsolidirano bilanco. V njem je videti naslednje posebnosti. 
+
+Cca dve tretjini kontov se agregira po standardnem sistemu. Za ostale veljajo naslednje izjeme:
+
+1. 400XXX, 401XXX, 402XXX nimajo štirimestnega konta, ker imajo enega vrinjenega med dvo in tromestnega. Očitno imajo samo štiri nivoje, zato ne morejo imeti štirimestnega. Jaz ga vseeno imam, ker zakaj ne. 
+
+2. 413300- 413310 nimajo tri in štirimestnih kontov. Enega ne zato, ker imajo istega vrinjenega kot pod prejnšnjo točko. Drugega pa ne, ker imajo na 4 nivoju agregacije spet šestmestne konte kjer se 413302-413306 seštejejo v 413302. Kar je kr neki. Zdej lahko dodam nov petmestni konto recimo 41339 za tole vsoto, ali pa čisto novega 9XX. Še ne vem kaj je bolj smiselno 
+
+3. konti na 44xxxx nimajo dvomestnega konta, ampak rimsko V., čeprav je v stari tabeli to 44. V vsakem primeru ne gre v 4
+
+4. konti na 50xxxx nimajo dvomestnega konta, ampak rimsko VII., čeprav je v stari tabeli to 50. V vsakem primeru ne gre v 5
+
+5. konti na 55xxxx nimajo dvomestnega konta, ampak rimsko VIII., čeprav je v stari tabeli to 55. V vsakem primeru ne gre v 5
+
+6. konti na 741xxx nimajo štirimestnega konta. Ne vem zakaj, ker so objavljeni tudi po štirimestnih. Jaz jih v vsakem primeru izračunam tudi te. 
+
+7. konti na 75xxxx nimajo dvomestnega konta ampak rimsko IV., čeprav je v stari tabeli to 75. V vsakem primeru ne gre v 7. 
+
+8. KOnti na 78xxxx nimajo štirimestnega konta, ker so najnižji objavljeni na tromestnem. Ne vem zakaj, ker so objavljeni tudi po štirimestnih. Jaz jih v vsakem primeru izračunam tudi te.
+
+
+
+

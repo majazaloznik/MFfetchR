@@ -2,7 +2,7 @@
 % Please edit documentation in R/importing_old.R
 \name{MF_import_structure_old}
 \alias{MF_import_structure_old}
-\title{Import structural metadata for a BS table}
+\title{Import structural metadata for a MF table}
 \usage{
 MF_import_structure_old(
   table_name,

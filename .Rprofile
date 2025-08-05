@@ -1,4 +1,10 @@
+if (interactive()) {
+  Sys.sleep(1)  # 100ms delay
+}
+cat("Starting renv activation...\n")
 source("renv/activate.R")
+cat("renv activation complete\n")
+
 
 if (Sys.getenv("CI") != "true") {
   Sys.setenv(http_proxy="http://proxy.gov.si:80")

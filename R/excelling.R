@@ -25,7 +25,8 @@
 mf_excel_parser <- function(file_path, table_name, sheet_name){
 
   # get head to extract header
-  data_head <- readxl::read_excel(file_path, sheet_name, n_max = 25, col_names = FALSE)
+  data_head <- suppressMessages(readxl::read_excel(file_path, sheet_name,
+                                                   n_max = 25, col_names = FALSE))
 
   # find first row - hardcoded that header is 8 rows before the first row.
   first_row <- which(data_head[,1] == "7")
@@ -43,8 +44,8 @@ mf_excel_parser <- function(file_path, table_name, sheet_name){
     dplyr::summarise(dplyr::across(everything(), ~  trim_inter(.x)))
 
   # read all the data in without the header
-  data_raw <- readxl::read_excel(file_path, sheet_name,
-                                 skip = first_row - 1, col_names = FALSE)
+  data_raw <- suppressMessages(readxl::read_excel(file_path, sheet_name,
+                                 skip = first_row - 1, col_names = FALSE))
   # remove empty rows
   data_clean <- data_raw[complete.cases(data_raw[,c(3,5)]),]
 
@@ -79,15 +80,13 @@ mf_excel_parser <- function(file_path, table_name, sheet_name){
     dplyr::relocate(order)
 
   series <- data_clean %>% dplyr::select(code, description)
-  # transpose
-  df <- as.data.frame(t(data_clean[,-3]))
-  colnames(df) <- df[2,]
-  df <- df[-c(1, 2),]
 
-  df$period_id <- row.names(df)
+  # Instead of transpose, reshape properly
+  df <- data_clean |>
+    dplyr::select(-order, -description) |>
+    tidyr::pivot_longer(-code, names_to = "period_id", values_to = "value") |>
+    tidyr::pivot_wider(names_from = code, values_from = value)
 
-  df <- df %>% dplyr::relocate(period_id) %>%
-    dplyr::mutate(dplyr::across(!period_id, as.numeric))
 
   # split into annual and monthly datasets.
   monthly <- df[grep("\\d+M\\d+", df$period_id),]

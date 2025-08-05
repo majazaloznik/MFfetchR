@@ -42,9 +42,9 @@
     },
     "RPostgres": {
       "Package": "RPostgres",
-      "Version": "1.4.7",
+      "Version": "1.4.8",
       "Source": "Repository",
-      "Repository": "RSPM",
+      "Repository": "CRAN",
       "Requirements": [
         "DBI",
         "R",
@@ -57,7 +57,7 @@
         "plogr",
         "withr"
       ],
-      "Hash": "beb7e18bf3f9e096f716a52a77ec793c"
+      "Hash": "c74e7e71feadc6b7c5de999483f330cd"
     },
     "Rcpp": {
       "Package": "Rcpp",
@@ -117,7 +117,7 @@
       "RemoteUsername": "majazaloznik",
       "RemoteRepo": "UMARaccessR",
       "RemoteRef": "main",
-      "RemoteSha": "919794e673abb6f57b07bf3cae3658c86c842aba",
+      "RemoteSha": "c192830d974a8ec4fb57d61588c4724d39fc8a58",
       "Requirements": [
         "DBI",
         "UMARimportR",
@@ -128,7 +128,7 @@
         "purrr",
         "rlang"
       ],
-      "Hash": "db2b50152efc20aff229dbf457e013a2"
+      "Hash": "cd2da741766f7e475f8145d4e605bda0"
     },
     "UMARimportR": {
       "Package": "UMARimportR",
@@ -251,13 +251,13 @@
     },
     "cpp11": {
       "Package": "cpp11",
-      "Version": "0.5.1",
+      "Version": "0.5.2",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
         "R"
       ],
-      "Hash": "9df43854f1c84685d095ed6270b52387"
+      "Hash": "2720e3fd3dad08f34b19b56b3d6f073d"
     },
     "crayon": {
       "Package": "crayon",
@@ -524,16 +524,16 @@
     },
     "lubridate": {
       "Package": "lubridate",
-      "Version": "1.9.3",
+      "Version": "1.9.4",
       "Source": "Repository",
-      "Repository": "RSPM",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "generics",
         "methods",
         "timechange"
       ],
-      "Hash": "680ad542fbcf801442c83a6ac5a2126c"
+      "Hash": "be38bc740fc51783a78edb5a157e4104"
     },
     "magrittr": {
       "Package": "magrittr",
@@ -567,9 +567,9 @@
     },
     "openxlsx": {
       "Package": "openxlsx",
-      "Version": "4.2.5.2",
+      "Version": "4.2.8",
       "Source": "Repository",
-      "Repository": "RSPM",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "Rcpp",
@@ -580,7 +580,7 @@
         "utils",
         "zip"
       ],
-      "Hash": "c03b4c18d42da881fb8e15a085c2b9d6"
+      "Hash": "0dae94b258dc5abc4713eacdbbebcb51"
     },
     "pillar": {
       "Package": "pillar",
