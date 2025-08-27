@@ -4,18 +4,24 @@
 \alias{MF_import_data_points_new}
 \title{Insert new data for a table i.e. a vintage}
 \usage{
-MF_import_data_points_new(file_path, table_name, con, schema = "platform")
+MF_import_data_points_new(
+  file_path,
+  encoding = "UTF-16LE",
+  table_name,
+  con,
+  schema = "platform"
+)
 }
 \arguments{
 \item{file_path}{path to excel file}
+
+\item{encoding}{what it says on the tin}
 
 \item{table_name}{name of table}
 
 \item{con}{connection to database}
 
 \item{schema}{Schema name}
-
-\item{sheet_name}{name of sheet}
 }
 \value{
 list of tables with counts for each inserted row.

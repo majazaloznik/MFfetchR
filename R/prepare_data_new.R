@@ -11,8 +11,8 @@
 #' db_writing family of functions.
 #'
 #' @param file_path path to excel file
+#' @param encoding what it says on the tin
 #' @param table_name name of table
-#' @param sheet_name name of sheet
 #' @param con connection to database
 #' @param schema schema name defaults to "platform"
 #'
@@ -21,10 +21,11 @@
 #' @export
 #'
 
-prepare_vintage_table_and_merge_data_points <- function(file_path, table_name, con, schema = "platform"){
+prepare_vintage_table_and_merge_data_points <- function(file_path, encoding = "UTF-16LE",
+                                                        table_name, con, schema = "platform"){
   DBI::dbExecute(con, paste("set search_path to", schema))
 
-  parsed_data <- mf_csv_parser_new(file_path)
+  parsed_data <- mf_csv_parser_new(file_path, encoding)
   # keep only series and data for table_name
   parsed_data$monthly <- parsed_data$monthly |> dplyr::filter(stringr::str_extract(
     code, "(?<=--)[^-]+(?=--)") == table_name)
@@ -51,10 +52,18 @@ prepare_vintage_table_and_merge_data_points <- function(file_path, table_name, c
 
   ## new version test:
   tbl_id <-  UMARaccessR::sql_get_table_id_from_table_code(con, table_name, schema)
-  old_data <- UMARaccessR::sql_get_data_points_full_from_table_id(tbl_id, con, schema)
+  old_data <- UMARaccessR::sql_get_data_points_full_from_table_id(tbl_id, con, schema) |>
+    dplyr::mutate(series_id = as.numeric(series_id))
 
   merged_data <- old_data |>
     dplyr::full_join(dplyr::bind_rows(parsed_data$monthly, parsed_data$annual), by = c("period_id", "series_id", "code"))
+  # # check if there are any differences
+  # x <- merged_data |>
+  #   tidyr::drop_na() |>
+  #   dplyr::mutate(diff = value.x-value.y)  |>
+  #   dplyr::filter(diff > 0.1 | diff < -0.1,
+  #                 period_id < "2025M01")
+
   # overwrite old data with new
   final <- merged_data |>
     dplyr::mutate(value = ifelse(!is.na(value.y), value.y, value.x)) |>
@@ -76,113 +85,18 @@ prepare_vintage_table_and_merge_data_points <- function(file_path, table_name, c
     dplyr::group_by(series_id) |>
     dplyr::summarise(series_id = unique(series_id)) |>
     dplyr::mutate(published = get_published_time())
-  # # check if there are any differences
-  # x <- merged_data |>
-  #   tidyr::drop_na() |>
-  #   dplyr::mutate(diff = value.x-value.y)  |>
-  #   dplyr::filter(diff > 0.1 | diff < -0.1,
-  #                 period_id < "2025M01")
-
-  # # figure out new month and year
-  # new_month <- max(parsed_data$monthly$period_id)
-  # new_year <- max(parsed_data$annual$period_id)
-  #
-  # # get first two series last vintages if they exist. (M & A)
-  # series_ids <- dplyr::tbl(con, "series") %>%
-  #   dplyr::filter(table_id == tbl_id) %>%
-  #   dplyr::slice_min(id, n = 2) %>%
-  #   dplyr::select(id) %>% dplyr::pull() %>%
-  #   as.numeric()
-  # vint_id_m <- UMARaccessR::sql_get_vintage_from_series(con, series_ids[1], schema = schema)
-  # vint_id_a <- UMARaccessR::sql_get_vintage_from_series(con, series_ids[2], schema = schema)
-  #
-  # old_data <- UMARaccessR::sql_get_data_points_full_from_table_id(tbl_id, con, schema)
-  #
-  # if(is.null(vint_id_a)){
-  #   annual_vintages <- vintage_table("A", tbl_id, con)} else {
-  #     # get latest period from latest vintage
-  #     max_year <- UMARaccessR::sql_get_last_period_from_vintage(con, vint_id_a)
-  #     if(identical(max_year, new_year)) {
-  #       warning(paste0("These annual vintages for table ", table_name,
-  #                      " are not new, they will not be inserted again."))
-  #       annual_vintages <- NULL
-  #       parsed_data$annual <- NULL
-  #       old_data <- old_data |>
-  #         dplyr::filter(grepl("M$", code)) # keep only monthly data
-  #     } else {
-  #       annual_vintages <- vintage_table("A", tbl_id, con)}
-  #   }
-  #
-  # if(is.null(vint_id_m)){
-  #   monthly_vintages <- vintage_table("M", tbl_id, con)} else {
-  #     # get latest period from latest vintage
-  #     max_month <- UMARaccessR::sql_get_last_period_from_vintage(con, vint_id_m)
-  #     if(identical(max_month, new_month)) {
-  #       stop(paste0("These monthly vintages for table ", table_name,
-  #                   " are not new, they will not be inserted again."))
-  #       monthly_vintages <- NULL
-  #       parsed_data$monthly <- NULL
-  #       old_data <- old_data |>
-  #         dplyr::filter(grepl("A$", code)) # keep only annual data
-  #     } else {
-  #       monthly_vintages <- vintage_table("M", tbl_id, con)
-  #     }
-  #   }
-  #
-  # # merge old data with new data
-  #
-  # merged_data <- old_data |>
-  #   dplyr::full_join(dplyr::bind_rows(parsed_data$monthly, parsed_data$annual), by = c("period_id", "series_id", "code"))
-  # # overwrite old data with new
-  # final <- merged_data |>
-  #   dplyr::mutate(value = ifelse(!is.na(value.y), value.y, value.x)) |>
-  #   dplyr::select(series_id, period_id, value)
-  # # check if there are any differences
-  # x <- merged_data |>
-  #   tidyr::drop_na() |>
-  #   dplyr::mutate(diff = value.x-value.y)  |>
-  #   dplyr::filter(diff > 0.1 | diff < -0.1,
-  #                 period_id < "2025M01")
-
-
-
   mget(c("monthly_vintages", "annual_vintages", "final"))
 }
 
 
-#'
-#' #' Prepare vintage table for M or A
-#' #'
-#' #' Helper function preparing for the vintage table for a specific table
-#' #' and either the monthly or the annual data. Uses current time as `published`
-#' #'
-#' #' @param interval "M" or "A"
-#' #' @param tbl_id numeric table id
-#' #' @param con connection to the database.
-#' #'
-#' #' @return data frame with `series_id` and `published` columns
-#' #' @keywords internal
-#'
-#' vintage_table <- function(interval, tbl_id, con) {
-#'   dplyr::tbl(con, "series") %>%
-#'     dplyr::filter(table_id == tbl_id,
-#'                   interval_id == interval) %>%
-#'     dplyr::select(series_id=id) %>%
-#'     dplyr::collect() %>%
-#'     dplyr::mutate(published = get_published_time())
-#' }
-#'
-#'
-#'
 #' Get and prepare data for import
 #'
 #' Prepares the timeseries data for importing into the database. Only works after
 #' vintages have been imported
 #'
-#'
+#' @param final_data list with at least monthly and annual dataframes with the data_points
+#' output of \link[MFfetchR]{prepare_vintage_table_and_merge_data_points}.
 #' @param con connection to database
-#' @param parsed_data list with at least monthly and annual dataframes with the data_points
-#' output of \link[MFfetchR]{mf_excel_parser}.
 #' @param schema schema name defaults to "parameter"
 #'
 #' @return a dataframe with the period_id, value and id values for all the vintages in the table.

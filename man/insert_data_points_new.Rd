@@ -7,18 +7,18 @@
 insert_data_points_new(final_data, con, schema = "platform")
 }
 \arguments{
+\item{final_data}{list with at least monthly and annual dataframes with the data_points
+output of \link[MFfetchR]{prepare_vintage_table_and_merge_data_points}.}
+
 \item{con}{connection to database}
 
 \item{schema}{schema name defaults to "platform"}
-
-\item{parsed_data}{list with at least monthly and annual dataframes with the data_points
-output of \link[MFfetchR]{mf_excel_parser}.}
 }
 \value{
 nothing, just some printing along the way
 }
 \description{
-So, the function extracts and preps the data with \link[MFfetchR]{prepare_mf_data_for_insert}
+So, the function extracts and preps the data with \link[MFfetchR]{prepare_mf_data_for_insert_new}
 and writes it to a temporary table in the database.
 }
 \details{

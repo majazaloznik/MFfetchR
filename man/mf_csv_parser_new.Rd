@@ -4,14 +4,12 @@
 \alias{mf_csv_parser_new}
 \title{MF csv table parser}
 \usage{
-mf_csv_parser_new(file_path)
+mf_csv_parser_new(file_path, encoding = "UTF-16LE")
 }
 \arguments{
-\item{file_path}{path to excel file}
+\item{file_path}{path to csv file}
 
-\item{table_name}{code of table to be used in series codes}
-
-\item{sheet_name}{the name of the sheet where the table is}
+\item{encoding}{what it says on the tin}
 }
 \value{
 list of three tables: annual and monthly series and the series codelist

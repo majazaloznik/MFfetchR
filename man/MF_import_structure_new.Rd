@@ -6,6 +6,7 @@
 \usage{
 MF_import_structure_new(
   file_path,
+  encoding = "UTF-16LE",
   table_name,
   con,
   schema = "platform",
@@ -13,6 +14,10 @@ MF_import_structure_new(
 )
 }
 \arguments{
+\item{file_path}{file path to data file}
+
+\item{encoding}{what it says on the tin}
+
 \item{table_name}{the table name (eg "DP")}
 
 \item{con}{connection to database}

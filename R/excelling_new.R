@@ -7,22 +7,27 @@
 #' In addition it calculates all the 9XX transformations.
 
 #' @param file_path path to csv file
-#' @param table_name code of table to be used in series codes
-#' @param sheet_name the name of the sheet where the table is
+#' @param encoding what it says on the tin
 #'
 #' @return list of three tables: annual and monthly series and the series codelist
 #' @export
-mf_csv_parser_new <- function(file_path) {
-  data_raw <- readr::read_csv2(file_path, locale = readr::locale(encoding = "UTF-16LE"))
-
-  # data <- data_raw |>
-  #   filter(LETO > 2023)
-
+mf_csv_parser_new <- function(file_path, encoding = "UTF-16LE") {
+  message("Reading csv file.")
+  data_raw <- readr::read_csv2(file_path, locale = readr::locale(encoding = encoding),
+                               show_col_types = FALSE)
+  if (nrow(data_raw) == 0) stop("There was no data read.")
+  required_cols <- c("BLG_ID", "LETO", "MESEC", "K6_ID", "VALUE", "KONTO", "TIP_ID")
+  missing_cols <- setdiff(required_cols, names(data_raw))
+  if (length(missing_cols) > 0) {
+    stop("Missing required columns: ", paste(missing_cols, collapse = ", "))
+  }
+  message("Read ", nrow(data_raw),  " rows of data.")
+  message("Preparing aggregations.")
   # Base data preparation
   data <- data_raw |>
     dplyr::select(-KONTO, -TIP_ID) |>
     dplyr::group_by(BLG_ID, LETO, MESEC, K6_ID) |>
-    dplyr::summarise(VALUE = sum(VALUE)) |>
+    dplyr::summarise(VALUE = sum(VALUE)) |> # aggregates over duplicates
     dplyr::filter(MESEC != 0) |>
     dplyr::mutate(
       BLG_ID = dplyr::case_when(
@@ -36,7 +41,7 @@ mf_csv_parser_new <- function(file_path) {
       K4 = K6_ID %/% 100,
       period_id = paste0(LETO, "M", sprintf("%02d", MESEC))
     ) |> dplyr::ungroup()
-
+  if (nrow(data_raw) != nrow(data)) message("Check for duplicates, there are ", nrow(data), " unique BLG_ID, period id and K6 combos.")
   # Level 4 (6-digit accounts) - no filtering needed
   level4 <- data |>
     dplyr::group_by(BLG_ID, K4, period_id, LETO) |>
@@ -88,6 +93,7 @@ mf_csv_parser_new <- function(file_path) {
 
   # expand table for missing months
   # Extract all unique periods that exist in your data
+  # this is to make sure all series have the same length, even if the value was 0
   all_periods <- monthly |>
     dplyr::pull(period_id) |>
     unique() |>
@@ -114,6 +120,7 @@ mf_csv_parser_new <- function(file_path) {
 
     add_values - subtract_values
   }
+  message("Calculating new transformed series.")
   # Apply transformations - select only the columns you need
   new_series <- transforms |>
     dplyr::filter(last == "M") |>
@@ -124,14 +131,14 @@ mf_csv_parser_new <- function(file_path) {
       monthly |>
         dplyr::filter(code %in% all_codes) |>
         dplyr::summarise(
-          value = calc_transform(dplyr::cur_data(), add_codes, subtract_codes),
+          value = calc_transform(dplyr::pick(dplyr::everything()), add_codes, subtract_codes),
           .by = period_id
         ) |>
         dplyr::mutate(code = target_code)
     })
 
   monthly <- dplyr::bind_rows(monthly, new_series)
-
+  message("Aggregating annual data and preparing series list.")
   annual <-  monthly |>
     dplyr::mutate(LETO = stringr::str_extract(period_id, "\\d{4}")) |>
     dplyr::group_by(code, LETO) |>
@@ -143,7 +150,7 @@ mf_csv_parser_new <- function(file_path) {
     dplyr::mutate(code = sub("M$", "A", code))|>
     dplyr::select(period_id, code, value)
 
-  series <- annual |>
+  series <- monthly |>
     dplyr::select(code) |>
     dplyr::distinct() |>
     dplyr::mutate(konto = stringr::str_extract(code, "(?<=--)[0-9]+(?=--)"),
@@ -151,6 +158,7 @@ mf_csv_parser_new <- function(file_path) {
     dplyr::left_join(konto_lookup) |>
     dplyr::select(-code) |>
     dplyr::filter(!is.na(description))
-
+message("Writing list with ", nrow(monthly), " rows of monthly data, ", nrow(annual),
+        " rows of annual data, and ", nrow(series), " series.")
   mget(c("monthly", "annual", "series"))
 }

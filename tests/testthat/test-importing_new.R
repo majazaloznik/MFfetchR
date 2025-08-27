@@ -1,14 +1,30 @@
-test_that("multiplication works", {
+test_that("importing structure from test table", {
   dittodb::with_mock_db({
     con_test <- make_test_connection()
-    xx <- MF_import_structure_new("C:/osebno/ZaloznikM37/bekapiranje/MFfetchR/inst/nove_tabele/Table_4BJF_BI_DATA/Table_4BJF_BI_DATA_1.csv",
-                                  "OB", con_test, schema = "platform", keep_vintage = TRUE)
+    on.exit(DBI::dbDisconnect(con_test), add = TRUE)
+    xx <- MF_import_structure_new(test_path("testdata/test006.csv"), "UTF-8",
+                                  "test_mf", con_test, schema = "platform")
     expect_true(is.list(xx))
     expect_equal(length(xx), 3)
     expect_true(all(sapply(xx, function(x) is.numeric(x))))
     expect_true(all(sapply(xx, function(x) x > 0)))
-    expect_true(xx$dimension_levels == 553)
-    expect_true(xx$series == 1106)
-    expect_true(xx$series_levels == 2212)
+    expect_equal(xx$dimension_levels, 5)
+    expect_equal(xx$series,10)
+    expect_equal(xx$series_levels, 20)
   })
 })
+
+test_that("importing data from test table", {
+  dittodb::with_mock_db({
+    con_test <- make_test_connection()
+    on.exit(DBI::dbDisconnect(con_test), add = TRUE)
+    xx <- MF_import_data_points_new(test_path("testdata/test006.csv"), "UTF-8",
+                              "test_mf", con_test, schema = "platform")
+    expect_true(is.list(xx))
+    expect_equal(length(xx), 2)
+    expect_equal(xx[[1]], 5)
+    expect_equal(xx[[2]], 5)
+  })
+})
+
+

@@ -4,10 +4,18 @@
 \alias{prepare_series_table_new}
 \title{Prepare table to insert into `series` table}
 \usage{
-prepare_series_table_new(file_path, table_name, con, schema = "platform")
+prepare_series_table_new(
+  file_path,
+  encoding = "UTF-16LE",
+  table_name,
+  con,
+  schema = "platform"
+)
 }
 \arguments{
 \item{file_path}{path to the excel file}
+
+\item{encoding}{of the file}
 
 \item{table_name}{character string of table code}
 

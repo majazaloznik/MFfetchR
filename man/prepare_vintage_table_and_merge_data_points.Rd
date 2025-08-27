@@ -6,6 +6,7 @@
 \usage{
 prepare_vintage_table_and_merge_data_points(
   file_path,
+  encoding = "UTF-16LE",
   table_name,
   con,
   schema = "platform"
@@ -14,13 +15,13 @@ prepare_vintage_table_and_merge_data_points(
 \arguments{
 \item{file_path}{path to excel file}
 
+\item{encoding}{what it says on the tin}
+
 \item{table_name}{name of table}
 
 \item{con}{connection to database}
 
 \item{schema}{schema name defaults to "platform"}
-
-\item{sheet_name}{name of sheet}
 }
 \value{
 list with a dataframe with the `series_id` and `published` columns

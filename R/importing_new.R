@@ -5,7 +5,9 @@
 #' insert the data into the database. But is used only for adding new
 #' series to the existing database from the new formatted csv files.
 #'
+#' @param file_path file path to data file
 #' @param table_name the table name (eg "DP")
+#' @param encoding what it says on the tin
 #' @param con connection to database
 #' @param schema schema name, defaults to "platform"
 #' @param keep_vintage logical indicating whether to keep vintages, defaults to F
@@ -13,20 +15,20 @@
 #' @returns nothing
 #' @export
 #'
-MF_import_structure_new <- function(file_path, table_name, con, schema = "platform",
+MF_import_structure_new <- function(file_path, encoding = "UTF-16LE", table_name, con, schema = "platform",
                                     keep_vintage = FALSE) {
 
   message("Importing structure data table ", table_name, " into schema ", schema)
   # Create list to store all results
   insert_results <- list()
    # prepare and select dimension levels before inserting them
-  dimension_levels_table <- prepare_dimension_levels_table_new(file_path,
+  dimension_levels_table <- prepare_dimension_levels_table_new(file_path, encoding,
                                                                table_name, con, schema)
   insert_results$dimension_levels <- UMARimportR::insert_new_dimension_levels(
     con, dimension_levels_table, schema)
   message("Dimension levels insert: ", insert_results$dimension_levels$count, " rows")
   # prepare and insert series table
-  series_table <- prepare_series_table_new(file_path, table_name, con, schema)
+  series_table <- prepare_series_table_new(file_path, encoding, table_name, con, schema)
   insert_results$series <- UMARimportR::insert_new_series(con, series_table, schema)
   message("Series insert: ", insert_results$series$count, " rows")
   # prepare and insert series levels table
@@ -48,8 +50,8 @@ MF_import_structure_new <- function(file_path, table_name, con, schema = "platfo
 #' vintages.
 #'
 #' @param file_path path to excel file
+#' @param encoding what it says on the tin
 #' @param table_name name of table
-#' @param sheet_name name of sheet
 #' @param con connection to database
 #' @param schema Schema name
 #'
@@ -60,8 +62,8 @@ MF_import_structure_new <- function(file_path, table_name, con, schema = "platfo
 #' \dontrun{
 #' purrr::walk(master_list_surs$code, ~insert_new_data(.x, con))
 #' }
-MF_import_data_points_new <- function(file_path, table_name, con,  schema = "platform") {
-  l <- prepare_vintage_table_and_merge_data_points(file_path, table_name, con, schema)
+MF_import_data_points_new <- function(file_path, encoding = "UTF-16LE", table_name, con,  schema = "platform") {
+  l <- prepare_vintage_table_and_merge_data_points(file_path, encoding, table_name, con, schema)
   # insert monthly data
   res <- list()
   res[[1]] <- UMARimportR::sql_function_call(con,
@@ -86,13 +88,13 @@ MF_import_data_points_new <- function(file_path, table_name, con,  schema = "pla
 #' Insert datapoints into data_point table
 #'
 #'
-#' So, the function extracts and preps the data with \link[MFfetchR]{prepare_mf_data_for_insert}
+#' So, the function extracts and preps the data with \link[MFfetchR]{prepare_mf_data_for_insert_new}
 #' and writes it to a temporary table in the database.
 #'
 #' It inserts any new periods into the period table,
 #' adds the data points to the data point table.
-#' @param parsed_data list with at least monthly and annual dataframes with the data_points
-#' output of \link[MFfetchR]{mf_excel_parser}.
+#' @param final_data list with at least monthly and annual dataframes with the data_points
+#' output of \link[MFfetchR]{prepare_vintage_table_and_merge_data_points}.
 #' @param con connection to database
 #' @param schema schema name defaults to "platform"
 #'
