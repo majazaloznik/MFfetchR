@@ -1,5 +1,7 @@
 # get raw codes and aggregated ones from classification
-konto_raw <- readr::read_csv2("M:\\data\\MF_javne_finance\\nove_testni_dump\\Table_4BJF_BI_DATA\\EK_Classification.csv", locale = readr::locale(encoding = "UTF-16LE"))
+konto_raw <- readr::read_delim("O:\\Avtomatizacija\\umar-automation-scripts\\data\\mf_bilance\\new_data\\Export_EK_2025-08-29_10-11-35.csv",
+                               delim = "\t",
+                               locale = readr::locale(encoding = "UTF-8"))
 konto_6 <- konto_raw |>
   select(K6_ID, K6_NAME) |>
   distinct() |>
