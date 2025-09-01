@@ -7,16 +7,17 @@
 #' In addition it calculates all the 9XX transformations.
 
 #' @param file_path path to csv file
-#' @param encoding what it says on the tin
 #'
 #' @return list of three tables: annual and monthly series and the series codelist
 #' @export
-mf_csv_parser_new <- function(file_path, encoding = "UTF-16LE") {
+mf_csv_parser_new <- function(file_path) {
   message("Reading csv file.")
-  data_raw <- readr::read_csv2(file_path, locale = readr::locale(encoding = encoding),
-                               show_col_types = FALSE)
+  data_raw <- readr::read_delim(file_path,
+                                delim = "\t",
+                                locale = readr::locale(encoding = "UTF-8", decimal_mark = ","),
+                                show_col_types = FALSE)
   if (nrow(data_raw) == 0) stop("There was no data read.")
-  required_cols <- c("BLG_ID", "LETO", "MESEC", "K6_ID", "VALUE", "KONTO", "TIP_ID")
+  required_cols <- c("BLG_ID", "LETO", "MESEC", "K6_ID", "VALUE" )
   missing_cols <- setdiff(required_cols, names(data_raw))
   if (length(missing_cols) > 0) {
     stop("Missing required columns: ", paste(missing_cols, collapse = ", "))
@@ -25,7 +26,6 @@ mf_csv_parser_new <- function(file_path, encoding = "UTF-16LE") {
   message("Preparing aggregations.")
   # Base data preparation
   data <- data_raw |>
-    dplyr::select(-KONTO, -TIP_ID) |>
     dplyr::group_by(BLG_ID, LETO, MESEC, K6_ID) |>
     dplyr::summarise(VALUE = sum(VALUE)) |> # aggregates over duplicates
     dplyr::filter(MESEC != 0) |>
@@ -41,7 +41,14 @@ mf_csv_parser_new <- function(file_path, encoding = "UTF-16LE") {
       K4 = K6_ID %/% 100,
       period_id = paste0(LETO, "M", sprintf("%02d", MESEC))
     ) |> dplyr::ungroup()
-  if (nrow(data_raw) != nrow(data)) message("Check for duplicates, there are ", nrow(data), " unique BLG_ID, period id and K6 combos.")
+  mesec_zero_count <- sum(data_raw$MESEC == 0)
+  message("Rows with MESEC == 0: ", mesec_zero_count)
+
+  # Expected row count after filter
+  expected_rows <- nrow(data_raw) - mesec_zero_count
+  message("Expected rows after MESEC filter: ", expected_rows)
+  message("Actual rows after processing: ", nrow(data))
+  if (expected_rows != nrow(data)) message("Check for duplicates, there are ", nrow(data), " unique BLG_ID, period id and K6 combos.")
   # Level 4 (6-digit accounts) - no filtering needed
   level4 <- data |>
     dplyr::group_by(BLG_ID, K4, period_id, LETO) |>
