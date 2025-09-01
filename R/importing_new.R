@@ -103,7 +103,7 @@ insert_data_points_new <- function(final_data, con, schema = "platform"){
   on.exit(DBI::dbExecute(con, sprintf("drop table tmp")))
   df <- prepare_mf_data_for_insert_new(final_data, con)
 
-  dbWriteTable(con,
+  DBI::dbWriteTable(con,
                "tmp",
                df,
                temporary = TRUE,
