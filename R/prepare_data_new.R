@@ -54,24 +54,7 @@ prepare_vintage_table_and_merge_data_points <- function(file_path,
   old_data <- UMARaccessR::sql_get_data_points_full_from_table_id(tbl_id, con, schema) |>
     dplyr::mutate(series_id = as.numeric(series_id))
 
-  merged_data <- old_data |>
-    dplyr::full_join(dplyr::bind_rows(parsed_data$monthly, parsed_data$annual), by = c("period_id", "series_id", "code"))
-  # # check if there are any differences
-  # x <- merged_data |>
-  #   tidyr::drop_na() |>
-  #   dplyr::mutate(diff = value.x-value.y)  |>
-  #   dplyr::filter(diff > 0.1 | diff < -0.1,
-  #                 period_id < "2025M01")
-
-  # overwrite old data with new
-  final <- merged_data |>
-    dplyr::mutate(value = ifelse(!is.na(value.y), value.y, value.x)) |>
-    dplyr::group_by(series_id) |>
-    dplyr::mutate(valid_old = sum(!is.na(dplyr::last(value.x))),
-                  valid_new = sum(!is.na(dplyr::last(value.y)))) |>
-    dplyr::filter(valid_old < valid_new) |>
-    dplyr::select(series_id, period_id, value) |>
-    dplyr::ungroup()
+  final <- dplyr::bind_rows(parsed_data$monthly, parsed_data$annual)
 
   annual_vintages <- final |>
     dplyr::filter(grepl("[0-9]{4}$", period_id)) |>
