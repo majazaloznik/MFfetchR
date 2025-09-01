@@ -100,7 +100,7 @@ MF_import_data_points_new <- function(file_path, table_name, con,  schema = "pla
 #' @export
 #'
 insert_data_points_new <- function(final_data, con, schema = "platform"){
-  on.exit(dbExecute(con, sprintf("drop table tmp")))
+  on.exit(DBI::dbExecute(con, sprintf("drop table tmp")))
   df <- prepare_mf_data_for_insert_new(final_data, con)
 
   dbWriteTable(con,
@@ -109,16 +109,16 @@ insert_data_points_new <- function(final_data, con, schema = "platform"){
                temporary = TRUE,
                overwrite = TRUE)
 
-  dbExecute(con, sprintf("alter table \"tmp\" add \"interval_id\" varchar"))
+  DBI::dbExecute(con, sprintf("alter table \"tmp\" add \"interval_id\" varchar"))
 
   # add interval_id so i can check if the periods are new and need adding
-  dbExecute(con,           "
+  DBI::dbExecute(con,           "
     update  \"tmp\"
     set  \"interval_id\" =  CASE WHEN (LENGTH(\"tmp\".\"period_id\") = 4.0) then 'A' else 'M' end
   ")
 
   # insert into period table periods that are not already in there.
-  x <- dbExecute(con, sprintf("insert into %s.period
+  x <- DBI::dbExecute(con, sprintf("insert into %s.period
                        select distinct on (\"period_id\") \"period_id\", tmp.interval_id from tmp
                        left join %s.period on period_id = period.id
                        on conflict do nothing",
@@ -127,7 +127,7 @@ insert_data_points_new <- function(final_data, con, schema = "platform"){
   print(paste(x, "new rows inserted into the period table"))
 
   # insert data into main data_point table
-  x <- dbExecute(con, sprintf("insert into %s.data_points
+  x <- DBI::dbExecute(con, sprintf("insert into %s.data_points
                        select id, period_id, value from tmp
                        on conflict do nothing",
                               dbQuoteIdentifier(con, schema)))
