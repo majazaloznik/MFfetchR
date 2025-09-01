@@ -122,15 +122,15 @@ insert_data_points_new <- function(final_data, con, schema = "platform"){
                        select distinct on (\"period_id\") \"period_id\", tmp.interval_id from tmp
                        left join %s.period on period_id = period.id
                        on conflict do nothing",
-                              dbQuoteIdentifier(con, schema),
-                              dbQuoteIdentifier(con, schema)))
+                              DBI::dbQuoteIdentifier(con, schema),
+                              DBI::dbQuoteIdentifier(con, schema)))
   print(paste(x, "new rows inserted into the period table"))
 
   # insert data into main data_point table
   x <- DBI::dbExecute(con, sprintf("insert into %s.data_points
                        select id, period_id, value from tmp
                        on conflict do nothing",
-                              dbQuoteIdentifier(con, schema)))
+                                   DBI::dbQuoteIdentifier(con, schema)))
   print(paste(x, "new rows inserted into the data_points table"))
 
 }
