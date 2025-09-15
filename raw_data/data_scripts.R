@@ -1,32 +1,4 @@
-# get raw codes and aggregated ones from classification
-konto_raw <- readr::read_delim("O:\\Avtomatizacija\\umar-automation-scripts\\data\\mf_bilance\\new_data\\Export_EK_2025-08-29_10-11-35.csv",
-                               delim = "\t",
-                               locale = readr::locale(encoding = "UTF-8"))
-konto_6 <- konto_raw |>
-  select(K6_ID, K6_NAME) |>
-  distinct() |>
-  rename(konto = K6_ID, description = K6_NAME)
-
-konto_4 <- konto_raw |>
-  select(K4_ID, K4_NAME) |>
-  distinct() |>
-  rename(konto = K4_ID, description = K4_NAME)
-
-konto_3 <- konto_raw |>
-  select(K3_ID, K3_NAME) |>
-  distinct() |>
-  rename(konto = K3_ID, description = K3_NAME)
-
-konto_2 <- konto_raw |>
-  select(K2_ID, K2_NAME) |>
-  distinct() |>
-  rename(konto = K2_ID, description = K2_NAME)
-
-konto_1 <- tibble(
-  konto = c("4", "7"),
-  description = c("II. SKUPAJ ODHODKI (40+41+42+43+45)",
-                  "I. SKUPAJ PRIHODKI (70+71+72+73+74+78)"))
-################################################################################
+###############################################################################
 ## prepare transformations for calcuated series (90x)
 ################################################################################
 calculated_series_lookup <- tibble::tribble(
@@ -73,14 +45,6 @@ base_transforms <- list(
   "920" = list(add = c("4"), subtract = c("403", "404")),
   "921" = list(add = c("413302", "413303", "413304", "413305", "413306"), subtract = c()))
 
-konto_lookup <- bind_rows(konto_1,
-                          konto_2,
-                          konto_3,
-                          konto_4,
-                          konto_6,
-                          calculated_series_lookup) |>
-  arrange(konto)
-
 # Define the pattern variations
 second_elements <- c("DP", "OB", "ZPIZ", "ZZZS", "KBJF")
 last_elements <- c("M", "A")
@@ -120,7 +84,6 @@ transforms <- purrr::imap(base_transforms, \(transform_def, target_num) {
   purrr::list_rbind() |>
   dplyr::filter(!target_code %in% excluded_codes)
 
-usethis::use_data(
-                  konto_lookup,
+usethis::use_data(calculated_series_lookup,
                   transforms,
                   internal = TRUE, overwrite = TRUE)

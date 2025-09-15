@@ -2,7 +2,7 @@ test_that("importing structure from test table", {
   dittodb::with_mock_db({
     con_test <- make_test_connection()
     on.exit(DBI::dbDisconnect(con_test), add = TRUE)
-    xx <- MF_import_structure_new(test_path("testdata/test006.csv"), "UTF-8",
+    xx <- MF_import_structure_new(test_path("testdata/test006.csv"),
                                   "test_mf", con_test, schema = "platform")
     expect_true(is.list(xx))
     expect_equal(length(xx), 3)
@@ -18,7 +18,7 @@ test_that("importing data from test table", {
   dittodb::with_mock_db({
     con_test <- make_test_connection()
     on.exit(DBI::dbDisconnect(con_test), add = TRUE)
-    xx <- MF_import_data_points_new(test_path("testdata/test006.csv"), "UTF-8",
+    xx <- MF_import_data_points_new(test_path("testdata/test006.csv"),
                               "test_mf", con_test, schema = "platform")
     expect_true(is.list(xx))
     expect_equal(length(xx), 2)

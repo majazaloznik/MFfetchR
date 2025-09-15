@@ -3,16 +3,16 @@ WITH parsed_periods AS (
  SELECT
    ldp.series_code,
    ldp.table_code,
-   ldp.name_long,  -- Already cleaned in mat_latest_data_points
+   ldp.name_long,
    ldp.period_id,
    ldp.value,
-   ldp.year,       -- Pre-computed
-   ldp.month,      -- Pre-computed
-   ldp.date,       -- Pre-computed
+   ldp.year,
+   ldp.month,
+   ldp.date,
    SPLIT_PART(ldp.series_code, '--', 3) as konto
  FROM views.mat_latest_data_points ldp
- WHERE ldp.year IS NOT NULL  -- Replaces regex filter
-   AND ldp.interval = 'M'    -- Only monthly data
+ WHERE ldp.year IS NOT NULL
+   AND ldp.interval = 'M'
    AND ldp.table_code IN ('ZPIZ', 'ZZZS', 'OB', 'KBJF', 'DP')
 ),
 cumulative_data AS (
@@ -53,7 +53,7 @@ group_totals AS (
    konto as group_code,
    prev_year_cumulative as group_prev_cumulative
  FROM with_yoy_calculations
- WHERE konto IN ('4', '7')  -- Only the group total rows
+ WHERE konto IN ('4', '7')
 ),
 current_max_period AS (
  SELECT
@@ -78,7 +78,6 @@ SELECT
  wyc.prev_year_cumulative,
  wyc.yoy_change,
  wyc.yoy_pct_change,
- -- Optimized contribution calculation using JOIN instead of scalar subquery
  CASE
    WHEN wyc.group_code IS NOT NULL THEN
      ROUND(
@@ -86,7 +85,8 @@ SELECT
        (wyc.prev_year_cumulative / NULLIF(gt.group_prev_cumulative, 0)), 2
      )
    ELSE NULL
- END as contribution
+ END as contribution,
+ wyc.month = MAX(wyc.month) OVER () as max_month
 FROM with_yoy_calculations wyc
 LEFT JOIN group_totals gt ON wyc.table_code = gt.table_code
  AND wyc.year = gt.year
@@ -205,3 +205,25 @@ CREATE INDEX idx_mat_quarterly_yoy_konto ON views.mat_quarterly_yoy (konto);
 -- Wrapper view
 CREATE OR REPLACE VIEW views.jf_cetrtletni AS
 SELECT * FROM views.mat_quarterly_yoy;
+
+-- regular view for all KBJF stuff
+CREATE VIEW views.filtered_latest_data_points AS
+SELECT
+    series_code,
+    table_code,
+    name_long,
+    period_id,
+    value,
+    "interval",
+    year,
+    month,
+    date,
+    -- Extract penultimate segment between hyphens
+    CASE
+        WHEN array_length(string_to_array(series_code, '--'), 1) >= 2
+        THEN (string_to_array(series_code, '--'))[array_length(string_to_array(series_code, '--'), 1) - 1]
+        ELSE NULL
+    END AS konto
+FROM views.mat_latest_data_points
+WHERE table_code IN ('KBJF', 'DP', 'OB', 'ZPIZ', 'ZZZS')
+ORDER BY series_code, period_id;

@@ -157,6 +157,7 @@ mf_csv_parser_new <- function(file_path) {
     dplyr::mutate(code = sub("M$", "A", code))|>
     dplyr::select(period_id, code, value)
 
+  konto_lookup <- get_konto_list_full("\\\\192.168.38.7\\public$\\Avtomatizacija\\umar-automation-scripts\\data\\mf_bilance\\new_data\\")
   series <- monthly |>
     dplyr::select(code) |>
     dplyr::distinct() |>

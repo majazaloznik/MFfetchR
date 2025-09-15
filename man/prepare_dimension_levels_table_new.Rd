@@ -6,7 +6,6 @@
 \usage{
 prepare_dimension_levels_table_new(
   file_path,
-  encoding = "UTF-16LE",
   table_name,
   con,
   schema = "platform"
@@ -14,8 +13,6 @@ prepare_dimension_levels_table_new(
 }
 \arguments{
 \item{file_path}{path to the csv file}
-
-\item{encoding}{of the file}
 
 \item{table_name}{character string of table code}
 

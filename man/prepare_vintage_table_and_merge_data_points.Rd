@@ -6,7 +6,6 @@
 \usage{
 prepare_vintage_table_and_merge_data_points(
   file_path,
-  encoding = "UTF-16LE",
   table_name,
   con,
   schema = "platform"
@@ -14,8 +13,6 @@ prepare_vintage_table_and_merge_data_points(
 }
 \arguments{
 \item{file_path}{path to excel file}
-
-\item{encoding}{what it says on the tin}
 
 \item{table_name}{name of table}
 

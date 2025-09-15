@@ -1,7 +1,7 @@
 Package: MFfetchR
 Type: Package
 Title: Parse, Transform & Import MF Data into the UMAR Database
-Version: 2.0.0
+Version: 2.1.0
 Author: Maja Zaloznik
 Maintainer: Maja Zaloznik <maja.zaloznik@gmail.com>
 Description: The goal of MFfetchR is to parse the MF public finance data, and prepare it for the UMAR data model.
