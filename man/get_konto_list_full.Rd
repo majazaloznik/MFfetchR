@@ -4,10 +4,12 @@
 \alias{get_konto_list_full}
 \title{Get current list of valid konto numbers from newest EK file}
 \usage{
-get_konto_list_full(folder)
+get_konto_list_full(folder, file = NULL)
 }
 \arguments{
 \item{folder}{folder path of the EK file}
+
+\item{file}{file for testing}
 }
 \value{
 table of kontos

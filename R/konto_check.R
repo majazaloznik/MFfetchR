@@ -1,13 +1,14 @@
 #' Get current list of valid konto numbers from newest EK file
 #'
 #' @param folder folder path of the EK file
+#' @param file file for testing
 #'
 #' @returns table of kontos
 #' @export
 
-get_konto_list_full <- function(folder){
-
-  file <- get_most_recent_file_from_pattern(folder,"^Export_EK.*\\.csv$")
+get_konto_list_full <- function(folder, file = NULL){
+  if (is.null(file)){
+    file <- get_most_recent_file_from_pattern(folder,"^Export_EK.*\\.csv$")}
   konto_raw <- readr::read_delim(file,
                                  delim = "\t",
                                  locale = readr::locale(encoding = "UTF-8"))

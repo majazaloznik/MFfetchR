@@ -4,10 +4,12 @@
 \alias{mf_csv_parser_new}
 \title{MF csv table parser}
 \usage{
-mf_csv_parser_new(file_path)
+mf_csv_parser_new(file_path, file_name = NULL)
 }
 \arguments{
 \item{file_path}{path to csv file}
+
+\item{file_name}{name of file for testing}
 }
 \value{
 list of three tables: annual and monthly series and the series codelist

@@ -6,6 +6,7 @@
 \usage{
 MF_import_structure_new(
   file_path,
+  file_name = NULL,
   table_name,
   con,
   schema = "platform",
@@ -14,6 +15,8 @@ MF_import_structure_new(
 }
 \arguments{
 \item{file_path}{file path to data file}
+
+\item{file_name}{name of file for testing}
 
 \item{table_name}{the table name (eg "DP")}
 

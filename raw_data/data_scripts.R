@@ -84,6 +84,46 @@ transforms <- purrr::imap(base_transforms, \(transform_def, target_num) {
   purrr::list_rbind() |>
   dplyr::filter(!target_code %in% excluded_codes)
 
-usethis::use_data(calculated_series_lookup,
+
+
+    file <- get_most_recent_file_from_pattern("\\\\192.168.38.7\\public$\\Avtomatizacija\\umar-automation-scripts\\data\\mf_bilance\\new_data\\","^Export_EK.*\\.csv$")
+  konto_raw <- readr::read_delim(file,
+                                 delim = "\t",
+                                 locale = readr::locale(encoding = "UTF-8"))
+  konto_6 <- konto_raw |>
+    dplyr::select(K6_ID, K6_NAME) |>
+    dplyr::distinct() |>
+    dplyr::rename(konto = K6_ID, description = K6_NAME)
+
+  konto_4 <- konto_raw |>
+    dplyr::select(K4_ID, K4_NAME) |>
+    dplyr::distinct() |>
+    dplyr::rename(konto = K4_ID, description = K4_NAME)
+
+  konto_3 <- konto_raw |>
+    dplyr::select(K3_ID, K3_NAME) |>
+    dplyr::distinct() |>
+    dplyr::rename(konto = K3_ID, description = K3_NAME)
+
+  konto_2 <- konto_raw |>
+    dplyr::select(K2_ID, K2_NAME) |>
+    dplyr::distinct() |>
+    dplyr::rename(konto = K2_ID, description = K2_NAME)
+
+  konto_1 <- dplyr::tribble(
+    ~konto, ~description,
+    "4", "II. SKUPAJ ODHODKI (40+41+42+43+45)",
+    "7", "I. SKUPAJ PRIHODKI (70+71+72+73+74+78)")
+
+  konto_lookup_hardcoded <- dplyr::bind_rows(konto_1,
+                                   konto_2,
+                                   konto_3,
+                                   konto_4,
+                                   konto_6,
+                                   calculated_series_lookup) |>
+    dplyr::arrange(konto)
+
+
+usethis::use_data(konto_lookup_hardcoded, calculated_series_lookup,
                   transforms,
                   internal = TRUE, overwrite = TRUE)

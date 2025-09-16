@@ -4,10 +4,18 @@
 \alias{MF_import_data_points_new}
 \title{Insert new data for a table i.e. a vintage}
 \usage{
-MF_import_data_points_new(file_path, table_name, con, schema = "platform")
+MF_import_data_points_new(
+  file_path,
+  file_name = NULL,
+  table_name,
+  con,
+  schema = "platform"
+)
 }
 \arguments{
 \item{file_path}{path to excel file}
+
+\item{file_name}{file name for testing}
 
 \item{table_name}{name of table}
 

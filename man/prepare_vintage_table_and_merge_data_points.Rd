@@ -6,6 +6,7 @@
 \usage{
 prepare_vintage_table_and_merge_data_points(
   file_path,
+  file_name = NULL,
   table_name,
   con,
   schema = "platform"
@@ -13,6 +14,8 @@ prepare_vintage_table_and_merge_data_points(
 }
 \arguments{
 \item{file_path}{path to excel file}
+
+\item{file_name}{name of file for testing}
 
 \item{table_name}{name of table}
 

@@ -7,12 +7,16 @@
 #' In addition it calculates all the 9XX transformations.
 
 #' @param file_path path to csv file
+#' @param file_name name of file for testing
 #'
 #' @return list of three tables: annual and monthly series and the series codelist
 #' @export
-mf_csv_parser_new <- function(file_path) {
+mf_csv_parser_new <- function(file_path, file_name = NULL) {
   message("Reading csv file.")
-  data_raw <- readr::read_delim(file_path,
+  if (is.null(file_name)){
+    file <- get_most_recent_file_from_pattern(file_path,"^Export_4KBJF.*\\.csv$")} else {
+      file <- paste0(file_path, file_name)}
+  data_raw <- readr::read_delim(file,
                                 delim = "\t",
                                 locale = readr::locale(encoding = "UTF-8", decimal_mark = ","),
                                 show_col_types = FALSE)
@@ -157,7 +161,11 @@ mf_csv_parser_new <- function(file_path) {
     dplyr::mutate(code = sub("M$", "A", code))|>
     dplyr::select(period_id, code, value)
 
-  konto_lookup <- get_konto_list_full("\\\\192.168.38.7\\public$\\Avtomatizacija\\umar-automation-scripts\\data\\mf_bilance\\new_data\\")
+  if (is.null(file_name)){
+    file <- get_most_recent_file_from_pattern(file_path,"^Export_EK.*\\.csv$")
+    konto_lookup <- get_konto_list_full(file)} else {
+      konto_lookup <- konto_lookup_hardcoded}
+
   series <- monthly |>
     dplyr::select(code) |>
     dplyr::distinct() |>

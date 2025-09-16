@@ -6,6 +6,7 @@
 \usage{
 prepare_dimension_levels_table_new(
   file_path,
+  file_name = NULL,
   table_name,
   con,
   schema = "platform"
@@ -13,6 +14,8 @@ prepare_dimension_levels_table_new(
 }
 \arguments{
 \item{file_path}{path to the csv file}
+
+\item{file_name}{name of file for testing}
 
 \item{table_name}{character string of table code}
 

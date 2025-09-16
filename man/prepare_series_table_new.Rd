@@ -4,10 +4,18 @@
 \alias{prepare_series_table_new}
 \title{Prepare table to insert into `series` table}
 \usage{
-prepare_series_table_new(file_path, table_name, con, schema = "platform")
+prepare_series_table_new(
+  file_path,
+  file_name = NULL,
+  table_name,
+  con,
+  schema = "platform"
+)
 }
 \arguments{
 \item{file_path}{path to the excel file}
+
+\item{file_name}{name of file for testing}
 
 \item{table_name}{character string of table code}
 

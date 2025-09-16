@@ -6,6 +6,7 @@
 #' db_writing family of functions.
 #'
 #' @param file_path path to the csv file
+#' @param file_name name of file for testing
 #' @param table_name character string of table code
 #' @param con connection to the database
 #' @param schema schema name defaults to "platform"
@@ -14,12 +15,12 @@
 #' columns for this table.
 #' @export
 #'
-prepare_dimension_levels_table_new <- function(file_path,  table_name,
+prepare_dimension_levels_table_new <- function(file_path, file_name = NULL,  table_name,
                                            con, schema = "platform") {
   tbl_id <- UMARaccessR::sql_get_table_id_from_table_code(con, table_name, schema)
   dim_ids <- UMARaccessR::sql_get_dimension_id_from_table_id_and_dimension(tbl_id, "Konto", con, schema)
 
-  df <- mf_csv_parser_new(file_path)$series
+  df <- mf_csv_parser_new(file_path, file_name)$series
   message("Preparing dimension levels table for table ", table_name, ".")
   df <- df  |>
     dplyr::filter(blg == table_name) |>
@@ -41,6 +42,7 @@ prepare_dimension_levels_table_new <- function(file_path,  table_name,
 #'
 #'
 #' @param file_path path to the excel file
+#' @param file_name name of file for testing
 #' @param table_name character string of table code
 #' @param con connection to the database
 #' @param schema schema name defaults to "platform"
@@ -51,11 +53,11 @@ prepare_dimension_levels_table_new <- function(file_path,  table_name,
 #' @export
 
 
-prepare_series_table_new <- function(file_path,  table_name, con, schema = "platform"){
+prepare_series_table_new <- function(file_path, file_name = NULL, table_name, con, schema = "platform"){
   tbl_id <-  UMARaccessR::sql_get_table_id_from_table_code(con, table_name, schema)
   dim_id <- UMARaccessR::sql_get_dimension_id_from_table_id_and_dimension(tbl_id, "Konto", con, schema)
 
-  df <- mf_csv_parser_new(file_path)$series
+  df <- mf_csv_parser_new(file_path, file_name)$series
   message("Preparing series table for table ", table_name, ".")
 
   df  |>

@@ -11,6 +11,7 @@
 #' db_writing family of functions.
 #'
 #' @param file_path path to excel file
+#' @param file_name name of file for testing
 #' @param table_name name of table
 #' @param con connection to database
 #' @param schema schema name defaults to "platform"
@@ -20,11 +21,11 @@
 #' @export
 #'
 
-prepare_vintage_table_and_merge_data_points <- function(file_path,
+prepare_vintage_table_and_merge_data_points <- function(file_path, file_name = NULL,
                                                         table_name, con, schema = "platform"){
   DBI::dbExecute(con, paste("set search_path to", schema))
 
-  parsed_data <- mf_csv_parser_new(file_path)
+  parsed_data <- mf_csv_parser_new(file_path, file_name)
   # keep only series and data for table_name
   parsed_data$monthly <- parsed_data$monthly |> dplyr::filter(stringr::str_extract(
     code, "(?<=--)[^-]+(?=--)") == table_name)
