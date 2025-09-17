@@ -49,6 +49,7 @@ get_most_recent_file_from_pattern <- function(folder, pattern){
   if(length(files) == 0) stop("No  files found")
   # Get most recent
   latest <- files[which.max(file.mtime(files))]
+  return(latest)
 }
 
 
@@ -61,11 +62,12 @@ get_most_recent_file_from_pattern <- function(folder, pattern){
 #' database, which is used in the joins for the materialised views
 #'
 #' @param file_path what it says on the tin
+#' @param con database connection
 #'
 #' @returns nothin
 #' @export
 #'
-update_JF_lookup_table_on_db <- function(file_path){
+update_JF_lookup_table_on_db <- function(file_path, con){
 
   data_raw <- mf_csv_parser_new(file_path)
 
@@ -79,7 +81,7 @@ update_JF_lookup_table_on_db <- function(file_path){
   codes_to_na <- c("902", "903", "904", "905", "906", "907", "908")
 
   konti <- konti %>%
-    dplyr::mutate(group_code = case_when(
+    dplyr::mutate(group_code = dplyr::case_when(
       stringr::str_starts(konto, "44") ~ NA,
       stringr::str_starts(konto, "75") ~ NA,
       stringr::str_starts(konto, "50") ~ NA,
@@ -93,7 +95,8 @@ update_JF_lookup_table_on_db <- function(file_path){
   # Write to database
   # Clear and repopulate without dropping
   DBI::dbExecute(con, "DELETE FROM views.\"JF_konto_lookup\"")
-  DBI::dbAppendTable(con,
+  out <- DBI::dbAppendTable(con,
                      name = DBI::Id(schema = "views", table = "JF_konto_lookup"),
                      value = konti)
+  return(out)
 }

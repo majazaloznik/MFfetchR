@@ -50,13 +50,15 @@ get_konto_list_full <- function(folder, file = NULL){
 #' Get current list of delivered konto numbers from newest 4BJF file
 #'
 #' @param folder folder path of the 4BJF file
+#' @param file file for testing
 #'
 #' @returns table of kontos
 #' @export
 
-get_konto_list_data <- function(folder){
+get_konto_list_data <- function(folder, file = NULL){
+  if (is.null(file)){
+    file <- get_most_recent_file_from_pattern(folder,"^Export_4BJF.*\\.csv$")}
 
-  file <- get_most_recent_file_from_pattern(folder,"^Export_4BJF.*\\.csv$")
   konto_raw <- readr::read_delim(file,
                                  delim = "\t",
                                  locale = readr::locale(encoding = "UTF-8"))
@@ -102,7 +104,9 @@ get_konto_list_data <- function(folder){
 #' @export
 
 get_db_konto_list <- function(con){
-  levels <- UMARaccessR::sql_get_dimension_levels_from_table_id(c(296:300), con) |>
+  if (identical(Sys.getenv("TESTTHAT"), "true")) {idz <- c(179:183)} else {
+    idz <- c(296:300)}
+     levels <- UMARaccessR::sql_get_dimension_levels_from_table_id(idz, con) |>
     dplyr::filter(dimension == "Konto") |>
     dplyr::select(level_value) |>
     dplyr::distinct()
@@ -113,16 +117,17 @@ return(levels)
 #' Check for new kontos
 #'
 #' @param folder folder path of the 4BJF file
+#' @param file file for testing
 #' @param con database connection
 #'
 #' @returns logical for new kotnos
 #' @export
 #'
-check_for_extra_kontos <- function(folder, con){
+check_for_extra_kontos <- function(folder, file = NULL, con){
   message("Checking if there are any new kontos.")
-  data_kontos <- get_konto_list_data(folder)
+  data_kontos <- get_konto_list_data(folder, file)
   db_kontos <- get_db_konto_list(con)
-  diff <- anti_join(data_kontos, db_kontos, by = c("konto"="level_value" ))
+  diff <- dplyr::anti_join(data_kontos, db_kontos, by = c("konto"="level_value" ))
   check <- nrow(diff) != 0
   if(check)   message("Found new kontos in data, need tu update structure in database.")
   return(check)

@@ -4,10 +4,12 @@
 \alias{check_for_extra_kontos}
 \title{Check for new kontos}
 \usage{
-check_for_extra_kontos(folder, con)
+check_for_extra_kontos(folder, file = NULL, con)
 }
 \arguments{
 \item{folder}{folder path of the 4BJF file}
+
+\item{file}{file for testing}
 
 \item{con}{database connection}
 }

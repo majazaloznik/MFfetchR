@@ -4,10 +4,12 @@
 \alias{update_JF_lookup_table_on_db}
 \title{Update konto lookup table on database when new kontos arrive}
 \usage{
-update_JF_lookup_table_on_db(file_path)
+update_JF_lookup_table_on_db(file_path, con)
 }
 \arguments{
 \item{file_path}{what it says on the tin}
+
+\item{con}{database connection}
 }
 \value{
 nothin

@@ -4,10 +4,12 @@
 \alias{get_konto_list_data}
 \title{Get current list of delivered konto numbers from newest 4BJF file}
 \usage{
-get_konto_list_data(folder)
+get_konto_list_data(folder, file = NULL)
 }
 \arguments{
 \item{folder}{folder path of the 4BJF file}
+
+\item{file}{file for testing}
 }
 \value{
 table of kontos
