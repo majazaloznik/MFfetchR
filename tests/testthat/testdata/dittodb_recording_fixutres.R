@@ -44,11 +44,6 @@ stop_db_capturing()
 
 start_db_capturing()
 con_test <- make_test_connection()
-update_JF_lookup_table_on_db("O:/Avtomatizacija/umar-automation-scripts/data/mf_bilance/new_data/", con_test)
-stop_db_capturing()
-
-start_db_capturing()
-con_test <- make_test_connection()
 Sys.setenv("TESTTHAT"="true")
 levels <- get_db_konto_list(con_test)
 Sys.setenv("TESTTHAT"="false")

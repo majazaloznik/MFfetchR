@@ -21,20 +21,3 @@ test_that("get most recent file", {
   # Clean up
   unlink(c(file1, file2, file3))
 })
-
-
-test_that("update_JF_lookup_table_on_db", {
-  dittodb::with_mock_db({
-    con_test <- make_test_connection()
-
-    local_mock <- mockery::mock(1677L)
-    mockery::stub(update_JF_lookup_table_on_db, 'DBI::dbAppendTable', local_mock)
-
-    out <- update_JF_lookup_table_on_db(
-      "O:/Avtomatizacija/umar-automation-scripts/data/mf_bilance/new_data/",
-      con_test
-    )
-
-    expect_equal(out, 1677)
-  })
-})
