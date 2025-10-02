@@ -21,7 +21,7 @@ MF_import_structure_new <- function(file_path, file_name = NULL,  table_name, co
   message("Importing structure data table ", table_name, " into schema ", schema)
   # Create list to store all results
   insert_results <- list()
-   # prepare and select dimension levels before inserting them
+  # prepare and select dimension levels before inserting them
   dimension_levels_table <- prepare_dimension_levels_table_new(file_path, file_name,
                                                                table_name, con, schema)
   insert_results$dimension_levels <- UMARimportR::insert_new_dimension_levels(
@@ -65,21 +65,22 @@ MF_import_structure_new <- function(file_path, file_name = NULL,  table_name, co
 MF_import_data_points_new <- function(file_path, file_name = NULL, table_name, con,  schema = "platform") {
   l <- prepare_vintage_table_and_merge_data_points(file_path, file_name, table_name, con, schema)
   # insert monthly data
-  res <- list()
-  res[[1]] <- UMARimportR::sql_function_call(con,
-                                             "insert_new_vintage",
-                                             as.list(l$monthly_vintages))
-  message("Monthly vintages inserted: ", sum(res[[1]]), " rows")
-
-  if(!is.null(l$annual_vintages)){
-    res[[2]] <- UMARimportR::sql_function_call(con,
+  if(!is.null(l)){
+    res <- list()
+    res[[1]] <- UMARimportR::sql_function_call(con,
                                                "insert_new_vintage",
-                                               as.list(l$annual_vintages))
-    message("Annual vintages inserted: ", sum(res[[2]]), " rows")
-  }
+                                               as.list(l$monthly_vintages))
+    message("Monthly vintages inserted: ", sum(res[[1]]), " rows")
 
-  insert_data_points_new(l[[3]], con)
-  lapply(res, sum)
+    if(!is.null(l$annual_vintages)){
+      res[[2]] <- UMARimportR::sql_function_call(con,
+                                                 "insert_new_vintage",
+                                                 as.list(l$annual_vintages))
+      message("Annual vintages inserted: ", sum(res[[2]]), " rows")
+    }
+
+    insert_data_points_new(l[[3]], con)
+    lapply(res, sum)}
 }
 
 
@@ -106,10 +107,10 @@ insert_data_points_new <- function(final_data, con, schema = "platform"){
   df <- prepare_mf_data_for_insert_new(final_data, con)
 
   DBI::dbWriteTable(con,
-               "tmp",
-               df,
-               temporary = TRUE,
-               overwrite = TRUE)
+                    "tmp",
+                    df,
+                    temporary = TRUE,
+                    overwrite = TRUE)
 
   DBI::dbExecute(con, sprintf("alter table \"tmp\" add \"interval_id\" varchar"))
 
@@ -124,8 +125,8 @@ insert_data_points_new <- function(final_data, con, schema = "platform"){
                        select distinct on (\"period_id\") \"period_id\", tmp.interval_id from tmp
                        left join %s.period on period_id = period.id
                        on conflict do nothing",
-                              DBI::dbQuoteIdentifier(con, schema),
-                              DBI::dbQuoteIdentifier(con, schema)))
+                                   DBI::dbQuoteIdentifier(con, schema),
+                                   DBI::dbQuoteIdentifier(con, schema)))
   print(paste(x, "new rows inserted into the period table"))
 
   # insert data into main data_point table

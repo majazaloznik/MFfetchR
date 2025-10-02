@@ -33,6 +33,12 @@ prepare_vintage_table_and_merge_data_points <- function(file_path, file_name = N
   parsed_data$annual <- parsed_data$annual |> dplyr::filter(stringr::str_extract(
     code, "(?<=--)[^-]+(?=--)") == table_name)
 
+  # check if new vintages are even necessary
+    tbl_id <- UMARaccessR::sql_get_table_id_from_table_code(con, table_name, schema)
+  latest_vintage <- UMARaccessR::sql_get_latest_vintages_for_table_id(tbl_id, con, schema)[1,3]
+  last_period_db <- UMARaccessR::sql_get_last_period_from_vintage(con,latest_vintage, schema)
+  new_period <- max(parsed_data$monthly$period_id)
+  if(new_period > last_period_db){
   # add series_id to monthly and annual data
   # get series_id for monthly codes
   monthly_codes <- data.frame(code = unique(parsed_data$monthly$code)) |>
@@ -63,26 +69,27 @@ prepare_vintage_table_and_merge_data_points <- function(file_path, file_name = N
   final <- merged_data |>
     dplyr::mutate(value = ifelse(!is.na(value.y), value.y, value.x)) |>
     dplyr::group_by(series_id) |>
-    dplyr::mutate(valid_old = sum(!is.na(dplyr::last(value.x))),
-                  valid_new = sum(!is.na(dplyr::last(value.y)))) |>
-    dplyr::filter(valid_old < valid_new) |>
     dplyr::select(series_id, period_id, value) |>
     dplyr::ungroup()
 
-  final <- dplyr::bind_rows(parsed_data$monthly, parsed_data$annual)
-
+  if(nrow(annual_codes) != 0) {
   annual_vintages <- final |>
     dplyr::filter(grepl("[0-9]{4}$", period_id)) |>
     dplyr::group_by(series_id) |>
     dplyr::summarise(series_id = unique(series_id)) |>
-    dplyr::mutate(published = get_published_time())
+    dplyr::mutate(published = get_published_time())} else {
+      final <- final |>
+        dplyr::filter(grepl("[0-9]{4}M[0-9]{2}$", period_id))
+      annual_vintages <- NULL }
 
   monthly_vintages <- final |>
     dplyr::filter(grepl("[0-9]{4}M[0-9]{2}$", period_id)) |>
     dplyr::group_by(series_id) |>
     dplyr::summarise(series_id = unique(series_id)) |>
     dplyr::mutate(published = get_published_time())
-  mget(c("monthly_vintages", "annual_vintages", "final"))
+  mget(c("monthly_vintages", "annual_vintages", "final"))} else {
+    message("Monthly data for ", new_period, " already exists in database. Import abandoned.")
+    return(NULL)}
 }
 
 

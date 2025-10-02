@@ -37,8 +37,8 @@ source("tests/testthat/helper-connection.R")
 start_db_capturing()
 con_test <- make_test_connection()
 Sys.setenv("TESTTHAT"="true")
-MF_import_data_points_new("C:/osebno/ZaloznikM37/bekapiranje/MFfetchR/tests/testthat/testdata/test006.csv", "UTF-8",
-                                            "test_mf", con_test, schema = "platform")
+MF_import_data_points_new("C:/osebno/ZaloznikM37/bekapiranje/MFfetchR/tests/testthat/testdata/", file_name = "test006.csv",
+                                            table_name = "test_mf", con = con_test, schema = "platform")
 Sys.setenv("TESTTHAT"="false")
 stop_db_capturing()
 
@@ -50,5 +50,12 @@ Sys.setenv("TESTTHAT"="false")
 stop_db_capturing()
 
 
+
+con_test <- make_test_connection()
+
+folder <- "O:\\Avtomatizacija\\umar-automation-scripts\\data\\mf_bilance\\new_data\\"
+
+MF_import_data_points_new(folder, table_name = "DP", con = con_test,
+                          schema = "platform")
 
 

@@ -22,8 +22,8 @@ test_that("importing data from test table", {
                               "test_mf", con_test, schema = "platform")
     expect_true(is.list(xx))
     expect_equal(length(xx), 2)
-    expect_equal(xx[[1]], 5)
-    expect_equal(xx[[2]], 5)
+    expect_equal(xx[[1]], 0)
+    expect_equal(xx[[2]], 0)
   })
 })
 

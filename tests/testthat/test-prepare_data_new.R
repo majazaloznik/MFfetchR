@@ -8,7 +8,7 @@ test_that("prepare vintage and data table", {
     expect_equal(length(xx), 3)
     expect_equal(nrow(xx$monthly_vintages), 5)
     expect_equal(nrow(xx$annual_vintages), 5)
-    expect_equal(nrow(xx$final), 65)
+    expect_equal(nrow(xx$final), 130)
 
   })
 })
