@@ -55,19 +55,19 @@ prepare_vintage_table_and_merge_data_points <- function(file_path, file_name = N
   old_data <- UMARaccessR::sql_get_data_points_full_from_table_id(tbl_id, con, schema) |>
     dplyr::mutate(series_id = as.numeric(series_id))
 
-  # # merge when we only get the last two years.
-  # merged_data <- old_data |>
-  #   dplyr::full_join(dplyr::bind_rows(parsed_data$monthly, parsed_data$annual), by = c("period_id", "series_id", "code"))
-  #
-  # # overwrite old data with new
-  # final <- merged_data |>
-  #   dplyr::mutate(value = ifelse(!is.na(value.y), value.y, value.x)) |>
-  #   dplyr::group_by(series_id) |>
-  #   dplyr::mutate(valid_old = sum(!is.na(dplyr::last(value.x))),
-  #                 valid_new = sum(!is.na(dplyr::last(value.y)))) |>
-  #   dplyr::filter(valid_old < valid_new) |>
-  #   dplyr::select(series_id, period_id, value) |>
-  #   dplyr::ungroup()
+  # merge when we only get the last two years.
+  merged_data <- old_data |>
+    dplyr::full_join(dplyr::bind_rows(parsed_data$monthly, parsed_data$annual), by = c("period_id", "series_id", "code"))
+
+  # overwrite old data with new
+  final <- merged_data |>
+    dplyr::mutate(value = ifelse(!is.na(value.y), value.y, value.x)) |>
+    dplyr::group_by(series_id) |>
+    dplyr::mutate(valid_old = sum(!is.na(dplyr::last(value.x))),
+                  valid_new = sum(!is.na(dplyr::last(value.y)))) |>
+    dplyr::filter(valid_old < valid_new) |>
+    dplyr::select(series_id, period_id, value) |>
+    dplyr::ungroup()
 
   final <- dplyr::bind_rows(parsed_data$monthly, parsed_data$annual)
 
