@@ -14,12 +14,9 @@
 mf_csv_parser_new <- function(file_path, file_name = NULL) {
   message("Reading csv file.")
   if (is.null(file_name)){
-    file <- get_most_recent_file_from_pattern(file_path,"^Export_4BJF.*\\.csv$")} else {
+    file <- get_most_recent_file_from_pattern(file_path, mf_file_patterns[["bjf"]])} else {
       file <- paste0(file_path, file_name)}
-  data_raw <- readr::read_delim(file,
-                                delim = "\t",
-                                locale = readr::locale(encoding = "UTF-8", decimal_mark = ","),
-                                show_col_types = FALSE)
+  data_raw <- read_mf_csv(file, decimal_mark = ",")
   if (nrow(data_raw) == 0) stop("There was no data read.")
   required_cols <- c("BLG_ID", "LETO", "MESEC", "K6_ID", "VALUE" )
   missing_cols <- setdiff(required_cols, names(data_raw))
@@ -162,7 +159,7 @@ mf_csv_parser_new <- function(file_path, file_name = NULL) {
     dplyr::select(period_id, code, value)
 
   if (is.null(file_name)){
-    file <- get_most_recent_file_from_pattern(file_path,"^Export_EK.*\\.csv$")
+    file <- get_most_recent_file_from_pattern(file_path, mf_file_patterns[["ek"]])
     konto_lookup <- get_konto_list_full(file = file)} else {
       konto_lookup <- konto_lookup_hardcoded}
 

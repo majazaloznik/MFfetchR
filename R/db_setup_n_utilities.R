@@ -100,3 +100,42 @@ update_JF_lookup_table_on_db <- function(file_path, con){
                      value = konti)
   return(out)
 }
+
+#' Regex patterns for MF export file names
+#'
+#' Anchored to the timestamp so that ad-hoc exports such as
+#' `Export_4BJF_ZZZZ_<timestamp>.csv` are not picked up.
+#'
+#' @export
+mf_file_patterns <- c(
+  bjf = "^Export_4BJF_\\d{4}-\\d{2}-\\d{2}_\\d{2}-\\d{2}-\\d{2}\\.csv$",
+  ek  = "^Export_EK_\\d{4}-\\d{2}-\\d{2}_\\d{2}-\\d{2}-\\d{2}\\.csv$")
+
+#' Read an MF tab-delimited export
+#'
+#' Detects the file encoding from the byte order mark (or null bytes) and
+#' transcodes UTF-16 exports to UTF-8 before parsing. MF switched to UTF-16LE
+#' with the September 2026 delivery.
+#'
+#' @param file path to the csv file
+#' @param decimal_mark decimal mark passed to [readr::locale()]
+#'
+#' @return tibble
+#' @export
+read_mf_csv <- function(file, decimal_mark = ".") {
+  bom <- readBin(file, "raw", n = 2L)
+  enc <- if (identical(bom, as.raw(c(0xFF, 0xFE)))) "UTF-16LE" else
+    if (identical(bom, as.raw(c(0xFE, 0xFF)))) "UTF-16BE" else
+      if (length(bom) == 2L && bom[2] == as.raw(0)) "UTF-16LE" else "UTF-8"
+  loc <- readr::locale(encoding = "UTF-8", decimal_mark = decimal_mark)
+  if (enc == "UTF-8") {
+    return(readr::read_delim(file, delim = "\t", locale = loc,
+                             show_col_types = FALSE))
+  }
+  message("Detected ", enc, " encoding, transcoding to UTF-8.")
+  txt <- iconv(list(readBin(file, "raw", n = file.size(file))),
+               from = enc, to = "UTF-8")
+  if (is.na(txt)) stop("Transcoding from ", enc, " failed: ", file)
+  txt <- sub("^\ufeff", "", txt)
+  readr::read_delim(I(txt), delim = "\t", locale = loc, show_col_types = FALSE)
+}

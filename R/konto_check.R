@@ -8,10 +8,8 @@
 
 get_konto_list_full <- function(folder, file = NULL){
   if (is.null(file)){
-    file <- get_most_recent_file_from_pattern(folder,"^Export_EK.*\\.csv$")}
-  konto_raw <- readr::read_delim(file,
-                                 delim = "\t",
-                                 locale = readr::locale(encoding = "UTF-8"))
+    file <- get_most_recent_file_from_pattern(folder, mf_file_patterns[["ek"]])}
+  konto_raw <- read_mf_csv(file)
   konto_6 <- konto_raw |>
     dplyr::select(K6_ID, K6_NAME) |>
     dplyr::distinct() |>
@@ -57,11 +55,9 @@ get_konto_list_full <- function(folder, file = NULL){
 
 get_konto_list_data <- function(folder, file = NULL){
   if (is.null(file)){
-    file <- get_most_recent_file_from_pattern(folder,"^Export_4BJF.*\\.csv$")}
+    file <- get_most_recent_file_from_pattern(folder, mf_file_patterns[["bjf"]])}
 
-  konto_raw <- readr::read_delim(file,
-                                 delim = "\t",
-                                 locale = readr::locale(encoding = "UTF-8"))
+  konto_raw <- read_mf_csv(file)
   konto_6 <- konto_raw |>
     dplyr::select(K6_ID) |>
     dplyr::distinct() |>
