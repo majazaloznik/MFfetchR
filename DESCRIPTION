@@ -7,7 +7,6 @@ Maintainer: Maja Zaloznik <maja.zaloznik@gmail.com>
 Description: The goal of MFfetchR is to parse the MF public finance data, and prepare it for the UMAR data model.
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.3.2
 Suggests: 
     covr,
     dittodb,
@@ -31,3 +30,4 @@ Remotes:
     majazaloznik/UMARimportR,
 Depends: 
     R (>= 3.5)
+Config/roxygen2/version: 8.1.0
